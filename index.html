@@ -698,12 +698,21 @@ function LoginScreen({ onLogin, residents }) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [passError, setPassError] = useState(false);
+  const [adminUser, setAdminUser] = useState("");
+  const [adminPin, setAdminPin] = useState("");
+  const [adminError, setAdminError] = useState("");
   const mob = useMobile();
 
   const handleJuntaLogin = () => {
     if (password !== "9999") { setPassError(true); return; }
     const member = JUNTA_MEMBERS.find(m => m.name.toLowerCase().includes(name.trim().toLowerCase()));
     onLogin({ role: "junta", name: member ? member.name : name.trim() });
+  };
+
+  const handleAdminLogin = () => {
+    if (adminUser.trim() !== "AdminVDS") { setAdminError("Usuario incorrecto"); return; }
+    if (adminPin !== "8888") { setAdminError("PIN incorrecto"); return; }
+    onLogin({ role: "admin", name: "Administradora" });
   };
 
   return (
@@ -759,13 +768,22 @@ function LoginScreen({ onLogin, residents }) {
               ) : (
                 <>
                   <input
-                    style={{ width: "100%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: "12px 14px", color: "#f8fafc", fontSize: 14, boxSizing: "border-box", fontFamily: "'Inter',sans-serif", marginBottom: 12, outline: "none" }}
-                    placeholder="Tu nombre completo"
-                    value={name} onChange={e => setName(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && name.trim() && onLogin({ role, name: name.trim(), apt: "" })}
+                    style={{ width: "100%", background: "rgba(255,255,255,0.07)", border: `1px solid ${adminError ? "#dc2626" : "rgba(255,255,255,0.15)"}`, borderRadius: 10, padding: "12px 14px", color: "#f8fafc", fontSize: 14, boxSizing: "border-box", fontFamily: "'Inter',sans-serif", marginBottom: 12, outline: "none" }}
+                    placeholder="Usuario"
+                    value={adminUser} onChange={e => { setAdminUser(e.target.value); setAdminError(""); }}
+                    onKeyDown={e => e.key === "Enter" && handleAdminLogin()}
                   />
+                  <input
+                    type="password"
+                    maxLength={6}
+                    style={{ width: "100%", background: "rgba(255,255,255,0.07)", border: `1px solid ${adminError ? "#dc2626" : "rgba(255,255,255,0.15)"}`, borderRadius: 10, padding: "12px 14px", color: "#f8fafc", fontSize: 18, letterSpacing: 6, boxSizing: "border-box", fontFamily: "'Inter',sans-serif", marginBottom: adminError ? 6 : 12, outline: "none" }}
+                    placeholder="PIN"
+                    value={adminPin} onChange={e => { setAdminPin(e.target.value.replace(/\D/g,"").slice(0,6)); setAdminError(""); }}
+                    onKeyDown={e => e.key === "Enter" && handleAdminLogin()}
+                  />
+                  {adminError && <div style={{ color: "#f87171", fontSize: 12, marginBottom: 10, textAlign: "center" }}>⚠️ {adminError}</div>}
                   <button
-                    onClick={() => { if (name.trim()) onLogin({ role, name: name.trim(), apt: "" }); }}
+                    onClick={handleAdminLogin}
                     style={{ width: "100%", background: "#f97316", color: "#fff", border: "none", borderRadius: 10, padding: "14px", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: "'Inter',sans-serif", marginTop: 4, letterSpacing: 0.2, boxShadow: "0 4px 14px rgba(249,115,22,0.4)" }}>
                     Ingresar →
                   </button>
