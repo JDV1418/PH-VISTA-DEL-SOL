@@ -272,6 +272,23 @@ const pri = (id) => PRIORITIES.find(p => p.id === id) || PRIORITIES[1];
 
 /* Formatea cualquier número como VDS-0001 */
 const fmtTicket = (n) => n ? `VDS-${String(n).padStart(4, '0')}` : '—';
+const fmtDateTime = r => {
+  const ts = r.date || "";
+  if (!ts) return "—";
+  if (ts.length <= 10) return ts; // solo fecha, sin conversión
+  const utc = new Date(ts);
+  if (isNaN(utc)) return ts;
+  // Panama es siempre UTC-5 (sin horario de verano)
+  const pa = new Date(utc.getTime() - 5 * 60 * 60 * 1000);
+  const dd   = String(pa.getUTCDate()).padStart(2,"0");
+  const mm   = String(pa.getUTCMonth()+1).padStart(2,"0");
+  const yyyy = pa.getUTCFullYear();
+  let   hh   = pa.getUTCHours();
+  const min  = String(pa.getUTCMinutes()).padStart(2,"0");
+  const ampm = hh >= 12 ? "p.m." : "a.m.";
+  hh = hh % 12 || 12;
+  return `${dd}/${mm}/${yyyy}, ${hh}:${min} ${ampm}`;
+};
 /* Calcula el siguiente número de ticket disponible, máximo 1000 */
 const nextTicketNum = (reports) => {
   const next = Math.max(0, ...reports.map(r => Number(r.ticketNum) || 0)) + 1;
@@ -349,36 +366,42 @@ function App() {
 
   const setReports = async (updater) => {
     const prev = reports, next = typeof updater === 'function' ? updater(prev) : updater;
+    setReportsLocal(next);
     for (const r of next) { if (!r._docId) await fbAddWithImages('reports', r); }
     for (const r of prev) { if (r._docId && !next.find(x => x._docId === r._docId)) await fbDelete('reports', r._docId); }
     for (const r of next) { if (r._docId) { const o = prev.find(x => x._docId === r._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...r,_docId:''})) await fbUpdate('reports', r._docId, r); } }
   };
   const setVendors = async (updater) => {
     const prev = vendors, next = typeof updater === 'function' ? updater(prev) : updater;
+    setVendorsLocal(next);
     for (const v of next) { if (!v._docId) await fbAdd('vendors', v); }
     for (const v of prev) { if (v._docId && !next.find(x => x._docId === v._docId)) await fbDelete('vendors', v._docId); }
     for (const v of next) { if (v._docId) { const o = prev.find(x => x._docId === v._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...v,_docId:''})) { const {_docId,...safe}=v; await fbUpdate('vendors', v._docId, safe); } } }
   };
   const setResidents = async (updater) => {
     const prev = residents, next = typeof updater === 'function' ? updater(prev) : updater;
+    setResidentsLocal(next);
     for (const r of next) { if (!r._docId) await fbAdd('residents', r); }
     for (const r of prev) { if (r._docId && !next.find(x => x._docId === r._docId)) await fbDelete('residents', r._docId); }
     for (const r of next) { if (r._docId) { const o = prev.find(x => x._docId === r._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...r,_docId:''})) { const {_docId,...safe}=r; await fbUpdate('residents', r._docId, safe); } } }
   };
   const setInspections = async (updater) => {
     const prev = inspections, next = typeof updater === 'function' ? updater(prev) : updater;
+    setInspectionsLocal(next); // actualización inmediata en UI
     for (const i of next) { if (!i._docId) await fbAdd('inspections', i); }
     for (const i of prev) { if (i._docId && !next.find(x => x._docId === i._docId)) await fbDelete('inspections', i._docId); }
     for (const i of next) { if (i._docId) { const o = prev.find(x => x._docId === i._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...i,_docId:''})) { const {_docId,...safe}=i; await fbSetField('inspections', i._docId, safe); } } }
   };
   const setComprobantes = async (updater) => {
     const prev = comprobantes, next = typeof updater === 'function' ? updater(prev) : updater;
+    setComprobantesLocal(next);
     for (const c of next) { if (!c._docId) await fbAddWithImages('comprobantes', c); }
     for (const c of prev) { if (c._docId && !next.find(x => x._docId === c._docId)) await fbDelete('comprobantes', c._docId); }
     for (const c of next) { if (c._docId) { const o = prev.find(x => x._docId === c._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...c,_docId:''})) { const {_docId,...safe}=c; await fbSetField('comprobantes', c._docId, safe); } } }
   };
   const setVotes = async (updater) => {
     const prev = votes, next = typeof updater === 'function' ? updater(prev) : updater;
+    setVotesLocal(next);
     for (const v of next) { if (!v._docId) await fbAdd('votes', v); }
     for (const v of prev) { if (v._docId && !next.find(x => x._docId === v._docId)) await fbDelete('votes', v._docId); }
     for (const v of next) { if (v._docId) { const o = prev.find(x => x._docId === v._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...v,_docId:''})) { const {_docId,...safe}=v; await fbUpdate('votes', v._docId, safe); } } }
@@ -621,7 +644,7 @@ function JuntaDashboard({ user, reports, residents, comprobantes, votes, onLogou
                     <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: i < recentReports.length-1 ? "1px solid #f1f5f9" : "none" }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 600, fontSize: 13, color: "#0f172a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
-                        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>Apto {r.apt} · {r.date}</div>
+                        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>Apto {r.apt} · {fmtDateTime(r)}</div>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: 8 }}>
                         <div style={{ width: 8, height: 8, borderRadius: "50%", background: priColor, flexShrink: 0 }}/>
@@ -698,7 +721,7 @@ function LoginScreen({ onLogin, residents }) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [passError, setPassError] = useState(false);
-  const [adminUser, setAdminUser] = useState("");
+  const [adminUser, setAdminUser] = useState("AdminVDS");
   const [adminPin, setAdminPin] = useState("");
   const [adminError, setAdminError] = useState("");
   const mob = useMobile();
@@ -884,7 +907,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
     </table>` : `<p style="color:#059669;font-weight:700">✅ No hay reportes urgentes activos.</p>`}
     <h2>Todos los Reportes</h2>
     <table><tr><th>#</th><th>Título</th><th>Categoría</th><th>Apto</th><th>Fecha</th><th>Estado</th><th>Proveedor</th></tr>
-    ${reports.map(r=>`<tr><td>${fmtTicket(r.ticketNum||r.id)}</td><td>${r.title}</td><td>${cat(r.category).label}</td><td>${r.apt}</td><td>${r.date}</td><td>${sta(r.status).label}</td><td>${r.vendor||"—"}</td></tr>`).join("")}
+    ${reports.map(r=>`<tr><td>${fmtTicket(r.ticketNum||r.id)}</td><td>${r.title}</td><td>${cat(r.category).label}</td><td>${r.apt}</td><td>${fmtDateTime(r)}</td><td>${sta(r.status).label}</td><td>${r.vendor||"—"}</td></tr>`).join("")}
     </table>
     <footer>PH Vista Del Sol v2.0 · Generado por ${user.name} · ${new Date().toLocaleString("es-ES")}</footer>
     </body></html>`);
@@ -994,7 +1017,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
         </div>
       )}
 
-      {showNewReport && <NewReportModal onClose={() => setSNR(false)} onSave={r => { const tn = nextTicketNum(reports); setReports(p => [...p, { ...r, id: Date.now(), ticketNum: tn }]); setSNR(false); }} vendors={vendors} mob={mob} />}
+      {showNewReport && <NewReportModal onClose={() => setSNR(false)} onSave={r => { const tn = nextTicketNum(reports); setReports(p => [...p, { ...r, id: Date.now(), ticketNum: tn, date: new Date().toISOString() }]); setSNR(false); }} vendors={vendors} mob={mob} />}
     </div>
   );
 }
@@ -1075,7 +1098,7 @@ function AdminDashboard({ reports, vendors, setView, setFS, mob, printSummary })
                     <div style={{ width: 6, flexShrink: 0, alignSelf: "stretch", background: "#ef4444", borderRadius: 3, marginTop: 2 }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 600, fontSize: 13, color: "#1e293b" }}>{r.title}</div>
-                      <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 3 }}>{c.label} · Apto {r.apt} · {r.date}</div>
+                      <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 3 }}>{c.label} · Apto {r.apt} · {fmtDateTime(r)}</div>
                       <div style={{ marginTop: 5 }}><Badge status={r.status} /></div>
                     </div>
                   </div>
@@ -1096,7 +1119,7 @@ function AdminDashboard({ reports, vendors, setView, setFS, mob, printSummary })
                     <div style={{ width: 38, height: 38, borderRadius: 10, background: c.color + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0 }}>{c.icon}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 600, fontSize: 13, color: "#1e293b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
-                      <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>Apto {r.apt} · {r.reporterName} · {r.date}</div>
+                      <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>Apto {r.apt} · {r.reporterName} · {fmtDateTime(r)}</div>
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, flexShrink: 0 }}>
                       <Badge status={r.status} />
@@ -1161,7 +1184,7 @@ function ReportsTable({ reports, filterCat, setFC, filterSta, setFS, filterTxt, 
                 <Badge status={r.status} />
                 <PriDot priority={r.priority} />
               </div>
-              <div style={{ fontSize: 12, color: "#64748b" }}>Apto {r.apt} · {r.reporterName} · {r.date}</div>
+              <div style={{ fontSize: 12, color: "#64748b" }}>Apto {r.apt} · {r.reporterName} · {fmtDateTime(r)}</div>
               {r.vendor && <div style={{ fontSize: 12, color: "#2563eb", marginTop: 4 }}>🏢 {r.vendor}</div>}
             </div>
           ))}
@@ -1188,7 +1211,7 @@ function ReportsTable({ reports, filterCat, setFC, filterSta, setFS, filterTxt, 
                   <td style={{ padding: "11px 14px" }}><CatChip category={r.category} /></td>
                   <td style={{ padding: "11px 14px", fontSize: 13 }}>{r.apt}</td>
                   <td style={{ padding: "11px 14px", fontSize: 13 }}>{r.reporterName}</td>
-                  <td style={{ padding: "11px 14px", fontSize: 12, color: "#64748b" }}>{r.date}</td>
+                  <td style={{ padding: "11px 14px", fontSize: 12, color: "#64748b" }}>{fmtDateTime(r)}</td>
                   <td style={{ padding: "11px 14px" }}><PriDot priority={r.priority} /></td>
                   <td style={{ padding: "11px 14px" }}><Badge status={r.status} /></td>
                   <td style={{ padding: "11px 14px", fontSize: 12, color: r.vendor ? "#0f172a" : "#d1d5db" }}>{r.vendor || "—"}</td>
@@ -1226,7 +1249,7 @@ function ReportDetail({ report, onBack, onUpdate, onDelete, vendors, mob }) {
       <div class="field"><div class="label">Apartamento</div><div class="value">${form.apt}</div></div>
       <div class="field"><div class="label">Reportado por</div><div class="value">${form.reporterName}</div></div>
       <div class="field"><div class="label">Teléfono</div><div class="value">${form.reporterPhone}</div></div>
-      <div class="field"><div class="label">Fecha</div><div class="value">${form.date}</div></div>
+      <div class="field"><div class="label">Fecha</div><div class="value">${fmtDateTime(form)}</div></div>
       <div class="field"><div class="label">Proveedor</div><div class="value">${form.vendor || "Sin asignar"}</div></div>
     </div>
     <div class="field"><div class="label">Descripción</div><div class="value" style="line-height:1.6">${form.description}</div></div>
@@ -1331,10 +1354,10 @@ function ReportDetail({ report, onBack, onUpdate, onDelete, vendors, mob }) {
                 const v = vendors.find(x => x.name === form.vendor);
                 if (!v) return null;
                 const cleanPhone = (v.phone || "").replace(/[\s\-\(\)]/g, "");
-                const msgText = `Hola ${v.contact || v.name}, le contactamos desde la administración del edificio.\n\n📋 *Caso asignado:* ${form.title}\n📍 *Ubicación:* Apto/Área ${form.apt}\n🔴 *Urgencia:* ${pri(form.priority).label.replace(/🔴|🟡|🟢/g,"").trim()}\n📅 *Fecha reporte:* ${form.date}\n\n📝 *Descripción:* ${form.description}\n\nPor favor confirmar disponibilidad. Gracias.`;
+                const msgText = `Hola ${v.contact || v.name}, le contactamos desde la administración del edificio.\n\n📋 *Caso asignado:* ${form.title}\n📍 *Ubicación:* Apto/Área ${form.apt}\n🔴 *Urgencia:* ${pri(form.priority).label.replace(/🔴|🟡|🟢/g,"").trim()}\n📅 *Fecha reporte:* ${fmtDateTime(form)}\n\n📝 *Descripción:* ${form.description}\n\nPor favor confirmar disponibilidad. Gracias.`;
                 const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msgText)}`;
                 const mailSubject = `Caso asignado: ${form.title} — Edificio`;
-                const mailBody = `Hola ${v.contact || v.name},\n\nLe contactamos desde la administración del edificio para informarle que le ha sido asignado el siguiente caso:\n\nCaso: ${form.title}\nUbicación: Apto/Área ${form.apt}\nUrgencia: ${pri(form.priority).label.replace(/🔴|🟡|🟢/g,"").trim()}\nFecha reporte: ${form.date}\n\nDescripción:\n${form.description}\n\nPor favor confirmar disponibilidad y fecha de atención.\n\nGracias,\nAdministración del Edificio`;
+                const mailBody = `Hola ${v.contact || v.name},\n\nLe contactamos desde la administración del edificio para informarle que le ha sido asignado el siguiente caso:\n\nCaso: ${form.title}\nUbicación: Apto/Área ${form.apt}\nUrgencia: ${pri(form.priority).label.replace(/🔴|🟡|🟢/g,"").trim()}\nFecha reporte: ${fmtDateTime(form)}\n\nDescripción:\n${form.description}\n\nPor favor confirmar disponibilidad y fecha de atención.\n\nGracias,\nAdministración del Edificio`;
                 const mailUrl = `mailto:${v.email || ""}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
                 return (
                   <div style={{ marginTop: 10 }}>
@@ -1378,7 +1401,10 @@ function ReportDetail({ report, onBack, onUpdate, onDelete, vendors, mob }) {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <FSel label="Categoría" editing={editing} value={form.category} onChange={v => f("category", v)} opts={CATS.map(c => ({ v: c.id, l: `${c.icon} ${c.label}` }))} />
               <FInp label="Apartamento" editing={editing} value={form.apt} onChange={v => f("apt", v)} />
-              <FInp label="Fecha" editing={editing} value={form.date} onChange={v => f("date", v)} type="date" />
+              {editing
+                ? <FInp label="Fecha" editing value={form.date} onChange={v => f("date", v)} type="date" />
+                : <div><div style={{ fontSize: 10, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 4 }}>Fecha</div><div style={{ fontSize: 13, color: "#1e293b" }}>{fmtDateTime(form)}</div></div>
+              }
             </div>
             <FTxt label="Descripción" editing={editing} value={form.description} onChange={v => f("description", v)} />
           </Card>
@@ -1450,8 +1476,9 @@ function ReportDetail({ report, onBack, onUpdate, onDelete, vendors, mob }) {
 function InspeccionesView({ inspections, setInspections, user, mob }) {
   const [subview, setSubview] = useState("home"); // home | nueva | running | detail
   const [activeInsp, setActiveInsp] = useState(null);
-  const [filterZone, setFilterZone] = useState("all");
-  const [filterFreq, setFilterFreq] = useState("all");
+  const [filterZone, setFilterZone]       = useState("all");
+  const [filterFreq, setFilterFreq]       = useState("all");
+  const [confirmDelInsp, setConfirmDelInsp] = useState(false);
 
   const startNew = (zoneId, frequency) => {
     const zone = ZONES.find(z => z.id === zoneId);
@@ -1556,7 +1583,7 @@ function InspeccionesView({ inspections, setInspections, user, mob }) {
         {filtered.length === 0
           ? <div style={{ background: "#fff", borderRadius: 10, padding: 32, textAlign: "center", color: "#64748b", fontSize: 13 }}>No hay inspecciones registradas aún.<br />Selecciona una zona arriba para comenzar.</div>
           : (mob
-            ? filtered.slice().reverse().map(insp => <InspCard key={insp.id} insp={insp} onSelect={() => { setActiveInsp(insp); setSubview("detail"); }} onPrint={printInspection} />)
+            ? [...filtered].sort((a,b) => b.date.localeCompare(a.date)).map(insp => <InspCard key={insp.id} insp={insp} onSelect={() => { setActiveInsp(insp); setSubview("detail"); }} onPrint={printInspection} />)
             : (
               <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", overflow: "hidden" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -1566,7 +1593,7 @@ function InspeccionesView({ inspections, setInspections, user, mob }) {
                     ))}
                   </tr></thead>
                   <tbody>
-                    {filtered.slice().reverse().map(insp => {
+                    {[...filtered].sort((a,b) => b.date.localeCompare(a.date)).map(insp => {
                       const z = ZONES.find(z => z.id === insp.zoneId);
                       const freq = FREQUENCIES.find(f => f.id === insp.frequency);
                       const bien = insp.items.filter(i => i.status === "bien").length;
@@ -1644,7 +1671,22 @@ function InspeccionesView({ inspections, setInspections, user, mob }) {
           <button onClick={() => setSubview("home")} style={btnSec(mob)}>← Historial</button>
           <div style={{ flex: 1 }} />
           <button onClick={() => printInspection(activeInsp)} style={btnSec(mob)}>🖨️ PDF</button>
-          <button onClick={() => setInspections(p => p.filter(i => i.id !== activeInsp.id)) || setSubview("home")} style={{ ...btnSec(mob), color: "#dc2626", borderColor: "#dc2626" }}>🗑️</button>
+          {confirmDelInsp
+            ? <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <span style={{ fontSize: 12, color: "#dc2626", fontWeight: 600 }}>¿Eliminar?</span>
+                <button onClick={async () => {
+                  if (activeInsp._docId && window.__db) {
+                    const { doc, deleteDoc } = window.__fs;
+                    await deleteDoc(doc(window.__db, 'inspections', activeInsp._docId));
+                  }
+                  setInspections(p => p.filter(i => (i._docId || i.id) !== (activeInsp._docId || activeInsp.id)));
+                  setConfirmDelInsp(false);
+                  setSubview("home");
+                }} style={{ background: "#dc2626", color: "#fff", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 700 }}>Sí</button>
+                <button onClick={() => setConfirmDelInsp(false)} style={{ background: "#f1f5f9", color: "#475569", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>No</button>
+              </div>
+            : <button onClick={() => setConfirmDelInsp(true)} style={{ ...btnSec(mob), color: "#dc2626", borderColor: "#dc2626" }}>🗑️</button>
+          }
         </div>
 
         <div style={{ fontWeight: 700, fontSize: mob ? 16 : 20, marginBottom: 4 }}>{zone.icon} {zone.label}</div>
@@ -1991,7 +2033,7 @@ function ResidentApp({ user, reports, setReports, comprobantes, setComprobantes,
                         <CatChip category={r.category} />
                         <PriDot priority={r.priority} />
                       </div>
-                      <div style={{ fontSize: 12, color: "#64748b", marginTop: 8 }}>📅 {r.date}</div>
+                      <div style={{ fontSize: 12, color: "#64748b", marginTop: 8 }}>📅 {fmtDateTime(r)}</div>
                       <div style={{ fontSize: 13, color: "#475569", marginTop: 8, lineHeight: 1.6 }}>{r.description}</div>
                       {r.vendor && <div style={{ fontSize: 12, color: "#2563eb", marginTop: 8, fontWeight: 600 }}>🏢 Proveedor: {r.vendor}</div>}
                       {r.notes && <div style={{ background: "#f8fafc", borderRadius: 8, padding: "8px 12px", marginTop: 10, fontSize: 12, color: "#475569", lineHeight: 1.5 }}>📝 {r.notes}</div>}
@@ -2005,7 +2047,7 @@ function ResidentApp({ user, reports, setReports, comprobantes, setComprobantes,
         {view === "nuevo" && (
           <ResidentReportForm
             user={user}
-            onSave={r => { const tn = nextTicketNum(reports); setReports(p => [...p, { ...r, id: Date.now(), ticketNum: tn, status: "pendiente", vendor: "", notes: "" }]); setView("mis_reportes"); }}
+            onSave={r => { const tn = nextTicketNum(reports); setReports(p => [...p, { ...r, id: Date.now(), ticketNum: tn, status: "pendiente", vendor: "", notes: "", date: new Date().toISOString() }]); setView("mis_reportes"); }}
           />
         )}
       </div>
@@ -3138,7 +3180,7 @@ function ResidentePerfil({ resident, comprobantes, setComprobantes, reports, onB
                       <div style={{ fontWeight: 600, fontSize: 13 }}>{r.title}</div>
                       <Badge status={r.status} />
                     </div>
-                    <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>📅 {r.date} · {cat(r.category).label}</div>
+                    <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>📅 {fmtDateTime(r)} · {cat(r.category).label}</div>
                   </div>
                 );
               })
