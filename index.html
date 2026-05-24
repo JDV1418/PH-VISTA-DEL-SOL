@@ -480,7 +480,7 @@ function JuntaDashboard({ user, reports, residents, comprobantes, votes, onLogou
     <div style={{ background: "#f1f5f9", height: "100dvh", overflowY: "auto", overflowX: "hidden", fontFamily: "'Inter',sans-serif", width: "100%", maxWidth: "100vw" }}>
 
       {/* Top Bar */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #e2e8f0", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ background: "#fff", borderBottom: "1px solid #e2e8f0", padding: mob ? "0 12px" : "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", overflow: "hidden" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #0d1b2a, #1e3a5f)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🏢</div>
           <div>
@@ -498,7 +498,7 @@ function JuntaDashboard({ user, reports, residents, comprobantes, votes, onLogou
       </div>
 
       {/* Content */}
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: mob ? "20px 16px" : "24px 24px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: mob ? "16px 12px" : "24px 24px", overflowX: "hidden", width: "100%" }}>
 
         {/* Welcome */}
         <div style={{ marginBottom: 24 }}>
@@ -1045,7 +1045,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
         </div>
 
         {/* SCROLL AREA */}
-        <div style={{ flex: 1, overflow: "auto", padding: mob ? "16px 14px 32px" : "24px 28px" }}>
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: mob ? "16px 14px 32px" : "24px 28px", width: "100%" }}>
           {view === "dashboard" && <AdminDashboard reports={reports} vendors={vendors} setView={(v) => { setView(v); setSR(null); }} setFS={setFS} mob={mob} printSummary={printSummary} />}
           {view === "reports" && (
             selectedReport
@@ -1168,7 +1168,7 @@ function AdminDashboard({ reports, vendors, setView, setFS, mob, printSummary })
         </div>
 
         {/* Actividad reciente */}
-        <div style={{ ...card, padding: mob ? 18 : 22, gridColumn: mob ? "1" : "1 / -1" }}>
+        <div style={{ ...card, padding: mob ? 18 : 22, gridColumn: mob ? "1" : "1 / -1", overflow: "hidden" }}>
           <div style={{ fontWeight: 700, fontSize: 14, color: "#0f172a", marginBottom: 18, letterSpacing: -0.2 }}>Actividad Reciente</div>
           {reports.length === 0
             ? <div style={{ color: "#94a3b8", fontSize: 13, textAlign: "center", padding: 20 }}>Sin reportes aún</div>
