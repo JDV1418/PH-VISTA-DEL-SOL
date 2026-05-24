@@ -368,42 +368,36 @@ function App() {
 
   const setReports = async (updater) => {
     const prev = reports, next = typeof updater === 'function' ? updater(prev) : updater;
-    setReportsLocal(next);
     for (const r of next) { if (!r._docId) await fbAddWithImages('reports', r); }
     for (const r of prev) { if (r._docId && !next.find(x => x._docId === r._docId)) await fbDelete('reports', r._docId); }
     for (const r of next) { if (r._docId) { const o = prev.find(x => x._docId === r._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...r,_docId:''})) await fbUpdate('reports', r._docId, r); } }
   };
   const setVendors = async (updater) => {
     const prev = vendors, next = typeof updater === 'function' ? updater(prev) : updater;
-    setVendorsLocal(next);
     for (const v of next) { if (!v._docId) await fbAdd('vendors', v); }
     for (const v of prev) { if (v._docId && !next.find(x => x._docId === v._docId)) await fbDelete('vendors', v._docId); }
     for (const v of next) { if (v._docId) { const o = prev.find(x => x._docId === v._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...v,_docId:''})) { const {_docId,...safe}=v; await fbUpdate('vendors', v._docId, safe); } } }
   };
   const setResidents = async (updater) => {
     const prev = residents, next = typeof updater === 'function' ? updater(prev) : updater;
-    setResidentsLocal(next);
     for (const r of next) { if (!r._docId) await fbAdd('residents', r); }
     for (const r of prev) { if (r._docId && !next.find(x => x._docId === r._docId)) await fbDelete('residents', r._docId); }
     for (const r of next) { if (r._docId) { const o = prev.find(x => x._docId === r._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...r,_docId:''})) { const {_docId,...safe}=r; await fbUpdate('residents', r._docId, safe); } } }
   };
   const setInspections = async (updater) => {
     const prev = inspections, next = typeof updater === 'function' ? updater(prev) : updater;
-    setInspectionsLocal(next); // actualización inmediata en UI
     for (const i of next) { if (!i._docId) await fbAdd('inspections', i); }
     for (const i of prev) { if (i._docId && !next.find(x => x._docId === i._docId)) await fbDelete('inspections', i._docId); }
     for (const i of next) { if (i._docId) { const o = prev.find(x => x._docId === i._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...i,_docId:''})) { const {_docId,...safe}=i; await fbSetField('inspections', i._docId, safe); } } }
   };
   const setComprobantes = async (updater) => {
     const prev = comprobantes, next = typeof updater === 'function' ? updater(prev) : updater;
-    setComprobantesLocal(next);
     for (const c of next) { if (!c._docId) await fbAddWithImages('comprobantes', c); }
     for (const c of prev) { if (c._docId && !next.find(x => x._docId === c._docId)) await fbDelete('comprobantes', c._docId); }
     for (const c of next) { if (c._docId) { const o = prev.find(x => x._docId === c._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...c,_docId:''})) { const {_docId,...safe}=c; await fbSetField('comprobantes', c._docId, safe); } } }
   };
   const setVotes = async (updater) => {
     const prev = votes, next = typeof updater === 'function' ? updater(prev) : updater;
-    setVotesLocal(next);
     for (const v of next) { if (!v._docId) await fbAdd('votes', v); }
     for (const v of prev) { if (v._docId && !next.find(x => x._docId === v._docId)) await fbDelete('votes', v._docId); }
     for (const v of next) { if (v._docId) { const o = prev.find(x => x._docId === v._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...v,_docId:''})) { const {_docId,...safe}=v; await fbUpdate('votes', v._docId, safe); } } }
