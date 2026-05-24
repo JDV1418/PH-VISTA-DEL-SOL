@@ -467,7 +467,12 @@ function JuntaDashboard({ user, reports, residents, comprobantes, votes, onLogou
   };
 
   const card = { background: "#fff", borderRadius: 16, padding: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" };
-  const today = new Date().toLocaleDateString("es-PA", { weekday:"long", day:"numeric", month:"long" });
+  const today = (() => {
+    const d = new Date(new Date().getTime() - 5*60*60*1000);
+    const dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+    const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    return `${dias[d.getUTCDay()]}, ${d.getUTCDate()} de ${meses[d.getUTCMonth()]}`;
+  })();
 
   return (
     <div style={{ background: "#f1f5f9", height: "100dvh", overflowY: "auto", fontFamily: "'Inter',sans-serif" }}>
