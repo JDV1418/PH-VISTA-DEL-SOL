@@ -3307,20 +3307,14 @@ function ComprobantesAdmin({ comprobantes, setComprobantes, residents, mob }) {
   const handleEstado = async (comp, nuevoEstado) => {
     const key = (comp._docId || comp.id) + nuevoEstado;
     setUpdating(key);
-    if (comp._docId) {
-      await fbSetField("comprobantes", comp._docId, { estado: nuevoEstado });
-    } else {
-      await setComprobantes(p => p.map(c => (c._docId||c.id) === (comp._docId||comp.id) ? { ...c, estado: nuevoEstado } : c));
-    }
+    setComprobantes(p => p.map(c => (c._docId||c.id) === (comp._docId||comp.id) ? { ...c, estado: nuevoEstado } : c));
+    if (comp._docId) await fbSetField("comprobantes", comp._docId, { estado: nuevoEstado });
     setUpdating(null);
   };
 
   const handleNota = async (comp) => {
-    if (comp._docId) {
-      await fbSetField("comprobantes", comp._docId, { notaAdmin: notaText });
-    } else {
-      await setComprobantes(p => p.map(c => (c._docId||c.id) === (comp._docId||comp.id) ? { ...c, notaAdmin: notaText } : c));
-    }
+    setComprobantes(p => p.map(c => (c._docId||c.id) === (comp._docId||comp.id) ? { ...c, notaAdmin: notaText } : c));
+    if (comp._docId) await fbSetField("comprobantes", comp._docId, { notaAdmin: notaText });
     setNotaModal(null);
     setNotaText("");
   };
@@ -3394,7 +3388,10 @@ function ComprobantesAdmin({ comprobantes, setComprobantes, residents, mob }) {
                       {resident ? ` · ${resident.nombre}` : comp.residentName ? ` · ${comp.residentName}` : ""}
                     </div>
                     <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>📅 Mes: {comp.mes || "—"} · Banco: {comp.banco || "—"} · Fecha pago: {comp.fecha || "—"}</div>
-                    {comp.uploadedAt && <div style={{ fontSize: 10, color: "#cbd5e1", marginTop: 1 }}>Subido: {new Date(comp.uploadedAt).toLocaleDateString("es-PA")}</div>}
+                    {comp.uploadedAt && (() => {
+                    const d = new Date(new Date(comp.uploadedAt).getTime() - 5*60*60*1000);
+                    return <div style={{ fontSize: 10, color: "#cbd5e1", marginTop: 1 }}>Subido: {String(d.getUTCDate()).padStart(2,"0")}/{String(d.getUTCMonth()+1).padStart(2,"0")}/{d.getUTCFullYear()}</div>;
+                  })()}
                   </div>
                   <span style={{ background: e.bg, color: e.color, border: `1px solid ${e.color}44`, borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{e.icon} {e.label}</span>
                 </div>
