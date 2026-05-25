@@ -1044,8 +1044,8 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           {view === "dashboard" && <AdminDashboard reports={reports} vendors={vendors} setView={(v) => { setView(v); setSR(null); }} setFS={setFS} mob={mob} printSummary={printSummary} />}
           {view === "reports" && (
             selectedReport
-              ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { setReports(p => p.map(r => r.id === id ? { ...r, archivado: true } : r)); setSR(null); }} vendors={vendors} mob={mob} />
-              : <ReportsTable reports={filteredReports} archivedReports={archivedReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => setReports(p => p.map(r => r.id === id ? { ...r, archivado: false } : r))} mob={mob} />
+              ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { setReports(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: true } : r)); setSR(null); }} vendors={vendors} mob={mob} />
+              : <ReportsTable reports={filteredReports} archivedReports={archivedReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => setReports(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: false } : r))} mob={mob} />
           )}
           {view === "inspecciones" && <InspeccionesView inspections={inspections} setInspections={setInspections} user={user} mob={mob} />}
           {view === "vendors"      && <VendorsView vendors={vendors} setVendors={setVendors} reports={reports} showNew={showNewVendor} setShowNew={setSNV} mob={mob} />}
@@ -1227,7 +1227,7 @@ function ReportsTable({ reports, archivedReports = [], filterCat, setFC, filterS
                     <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 3 }}>Apto {r.apt} · {r.reporterName} · {fmtDateTime(r)}</div>
                     <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{cat(r.category).icon} {cat(r.category).label} · {sta(r.status).label}</div>
                   </div>
-                  <button onClick={() => onRestore && onRestore(r.id)} style={{ background: "#f0fdf4", color: "#059669", border: "1px solid #059669", borderRadius: 8, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 600, flexShrink: 0 }}>↩ Restaurar</button>
+                  <button onClick={() => onRestore && onRestore(r._docId || r.id)} style={{ background: "#f0fdf4", color: "#059669", border: "1px solid #059669", borderRadius: 8, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 600, flexShrink: 0 }}>↩ Restaurar</button>
                 </div>
               </div>
             ))
@@ -1380,7 +1380,7 @@ function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob }) {
         {confirmArchive
           ? <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
               <span style={{ fontSize: 12, color: "#d97706", fontWeight: 600 }}>¿Archivar reporte?</span>
-              <button onClick={() => { onArchive(report.id); setConfirmArchive(false); }} style={{ background: "#d97706", color: "#fff", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 700 }}>Sí</button>
+              <button onClick={() => { onArchive(report._docId || report.id); setConfirmArchive(false); }} style={{ background: "#d97706", color: "#fff", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 700 }}>Sí</button>
               <button onClick={() => setConfirmArchive(false)} style={{ background: "#f1f5f9", color: "#475569", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>No</button>
             </div>
           : <button onClick={() => setConfirmArchive(true)} style={{ ...btnSec(mob), color: "#d97706", borderColor: "#d97706" }}>📦 Archivar</button>
