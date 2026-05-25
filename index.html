@@ -1044,8 +1044,23 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           {view === "dashboard" && <AdminDashboard reports={reports} vendors={vendors} setView={(v) => { setView(v); setSR(null); }} setFS={setFS} mob={mob} printSummary={printSummary} />}
           {view === "reports" && (
             selectedReport
-              ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { setReports(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: true } : r)); setSR(null); }} vendors={vendors} mob={mob} />
-              : <ReportsTable reports={filteredReports} archivedReports={archivedReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => setReports(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: false } : r))} mob={mob} />
+              ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={async id => {
+                const rep = reports.find(r => (r._docId || r.id) === id);
+                if (rep?._docId && window.__db) {
+                  const { doc, updateDoc } = window.__fs;
+                  await updateDoc(doc(window.__db, 'reports', rep._docId), { archivado: true });
+                }
+                setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: true } : r));
+                setSR(null);
+              }} vendors={vendors} mob={mob} />
+              : <ReportsTable reports={filteredReports} archivedReports={archivedReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={async id => {
+                const rep = reports.find(r => (r._docId || r.id) === id);
+                if (rep?._docId && window.__db) {
+                  const { doc, updateDoc } = window.__fs;
+                  await updateDoc(doc(window.__db, 'reports', rep._docId), { archivado: false });
+                }
+                setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: false } : r));
+              }} mob={mob} />
           )}
           {view === "inspecciones" && <InspeccionesView inspections={inspections} setInspections={setInspections} user={user} mob={mob} />}
           {view === "vendors"      && <VendorsView vendors={vendors} setVendors={setVendors} reports={reports} showNew={showNewVendor} setShowNew={setSNV} mob={mob} />}
