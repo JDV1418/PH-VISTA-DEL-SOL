@@ -3386,6 +3386,22 @@ function ComprobantesAdmin({ comprobantes, setComprobantes, residents, mob }) {
     setUpdating(key);
     setComprobantes(p => p.map(c => (c._docId||c.id) === (comp._docId||comp.id) ? { ...c, estado: nuevoEstado } : c));
     if (comp._docId) await fbSetField("comprobantes", comp._docId, { estado: nuevoEstado });
+    // Notificar al residente por WhatsApp si se verificó
+    if (nuevoEstado === "verificado" && comp.apt) {
+      try {
+        await fetch("https://vds-whatsapp-bot-production.up.railway.app/notify-comprobante", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            apt:          comp.apt,
+            residentName: comp.residentName || "",
+            mes:          comp.mes || "",
+            banco:        comp.banco || "",
+            monto:        comp.monto || ""
+          })
+        });
+      } catch (e) { console.error("Error notificando comprobante:", e); }
+    }
     setUpdating(null);
   };
 
@@ -3475,8 +3491,10 @@ function ComprobantesAdmin({ comprobantes, setComprobantes, residents, mob }) {
 
                 {/* Imagen */}
                 {comp.imagen && (
-                  <img src={comp.imagen} alt="comprobante" onClick={() => setViewImg(comp.imagen)}
-                    style={{ width: "100%", maxHeight: 160, objectFit: "cover", borderRadius: 8, marginTop: 12, cursor: "zoom-in" }} />
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 8, background: "#f8fafc", borderRadius: 8, padding: "6px 10px", cursor: "pointer", border: "1px solid #e2e8f0" }} onClick={() => setViewImg(comp.imagen)}>
+                    <img src={comp.imagen} alt="comprobante" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: 6 }} />
+                    <span style={{ fontSize: 12, color: "#0284c7", fontWeight: 600 }}>🔍 Ver comprobante</span>
+                  </div>
                 )}
 
                 {/* Nota admin */}
