@@ -1070,15 +1070,16 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
 
       {/* MOBILE BOTTOM NAV */}
       {mob && (
-        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#0d1b2a", display: "flex", flexDirection: "column", borderTop: "1px solid rgba(255,255,255,0.07)", zIndex: 100, paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-          <div style={{ display: "flex" }}>
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#0d1b2a", borderTop: "1px solid rgba(255,255,255,0.07)", zIndex: 100, paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.ceil(navItems.length/2)}, 1fr)` }}>
             {navItems.map(item => (
               <button key={item.id} onClick={() => { setView(item.id); setSR(null); }} style={{
-                flex: 1, background: "transparent", border: "none", padding: "10px 0",
-                color: view === item.id ? "#f97316" : "#475569", cursor: "pointer", fontFamily: "'Inter',sans-serif"
+                background: "transparent", border: "none", padding: "6px 2px",
+                color: view === item.id ? "#f97316" : "#475569", cursor: "pointer", fontFamily: "'Inter',sans-serif",
+                borderBottom: view === item.id ? "2px solid #f97316" : "2px solid transparent"
               }}>
-                <div style={{ fontSize: 18 }}>{item.icon}</div>
-                <div style={{ fontSize: 9, marginTop: 2, fontWeight: view === item.id ? 700 : 400 }}>{item.label}</div>
+                <div style={{ fontSize: 16 }}>{item.icon}</div>
+                <div style={{ fontSize: 8, marginTop: 1, fontWeight: view === item.id ? 700 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.label}</div>
               </button>
             ))}
           </div>
