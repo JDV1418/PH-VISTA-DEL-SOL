@@ -405,7 +405,17 @@ function App() {
 
   if (!user) return <LoginScreen onLogin={handleLogin} residents={residents} />;
   if (user.role === "junta") return <JuntaDashboard user={user} reports={reports} residents={residents} comprobantes={comprobantes} votes={votes} onLogout={handleLogout} />;
-  return <AdminApp user={user} reports={reports} setReports={setReports} vendors={vendors} setVendors={setVendors} residents={residents} setResidents={setResidents} inspections={inspections} setInspections={setInspections} comprobantes={comprobantes} setComprobantes={setComprobantes} votes={votes} setVotes={setVotes} onLogout={handleLogout} />;
+  const handleArchiveReport = (id) => {
+    setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: true } : r));
+    const rep = reports.find(r => (r._docId || r.id) === id);
+    if (rep?._docId) fbSetField('reports', rep._docId, { archivado: true });
+  };
+  const handleRestoreReport = (id) => {
+    setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: false } : r));
+    const rep = reports.find(r => (r._docId || r.id) === id);
+    if (rep?._docId) fbSetField('reports', rep._docId, { archivado: false });
+  };
+  return <AdminApp user={user} reports={reports} setReports={setReports} vendors={vendors} setVendors={setVendors} residents={residents} setResidents={setResidents} inspections={inspections} setInspections={setInspections} comprobantes={comprobantes} setComprobantes={setComprobantes} votes={votes} setVotes={setVotes} onArchiveReport={handleArchiveReport} onRestoreReport={handleRestoreReport} onLogout={handleLogout} />;
 }
 
 /* ─── JUNTA DASHBOARD ─── */
@@ -879,7 +889,7 @@ function LoginScreen({ onLogin, residents }) {
 }
 
 /* ─── ADMIN APP ─── */
-function AdminApp({ user, reports, setReports, vendors, setVendors, residents, setResidents, inspections, setInspections, comprobantes, setComprobantes, votes, setVotes, onLogout }) {
+function AdminApp({ user, reports, setReports, vendors, setVendors, residents, setResidents, inspections, setInspections, comprobantes, setComprobantes, votes, setVotes, onArchiveReport, onRestoreReport, onLogout }) {
   const [view, setView]             = useState("dashboard");
   const [filterCat, setFC]          = useState("all");
   const [filterSta, setFS]          = useState("all");
@@ -975,8 +985,8 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
     return !r.archivado && matchTxt &&
       (filterCat === "all" || r.category === filterCat) &&
       (filterSta === "all" || r.status === filterSta);
-  });
-  const archivedReports = reports.filter(r => r.archivado);
+  }).sort((a,b) => (a.date||"").localeCompare(b.date||""));
+  const archivedReports = reports.filter(r => r.archivado).sort((a,b) => (b.date||"").localeCompare(a.date||""));
 
   return (
     <div style={{ display: "flex", height: "100dvh", fontFamily: "'Inter',sans-serif", background: "#f0f4f8", color: "#1e293b", flexDirection: mob ? "column" : "row" }}>
@@ -1044,17 +1054,8 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           {view === "dashboard" && <AdminDashboard reports={reports} vendors={vendors} setView={(v) => { setView(v); setSR(null); }} setFS={setFS} mob={mob} printSummary={printSummary} />}
           {view === "reports" && (
             selectedReport
-              ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => {
-                setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: true } : r));
-                const rep = reports.find(r => (r._docId || r.id) === id);
-                if (rep?._docId) fbSetField('reports', rep._docId, { archivado: true });
-                setSR(null);
-              }} vendors={vendors} mob={mob} />
-              : <ReportsTable reports={filteredReports} archivedReports={archivedReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => {
-                setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: false } : r));
-                const rep = reports.find(r => (r._docId || r.id) === id);
-                if (rep?._docId) fbSetField('reports', rep._docId, { archivado: false });
-              }} mob={mob} />
+              ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { onArchiveReport(id); setSR(null); }} vendors={vendors} mob={mob} />
+              : <ReportsTable reports={filteredReports} archivedReports={archivedReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => { onRestoreReport(id); }} mob={mob} />
           )}
           {view === "inspecciones" && <InspeccionesView inspections={inspections} setInspections={setInspections} user={user} mob={mob} />}
           {view === "vendors"      && <VendorsView vendors={vendors} setVendors={setVendors} reports={reports} showNew={showNewVendor} setShowNew={setSNV} mob={mob} />}
