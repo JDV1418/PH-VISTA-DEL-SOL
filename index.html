@@ -275,7 +275,7 @@ const pri = (id) => PRIORITIES.find(p => p.id === id) || PRIORITIES[1];
 /* Formatea cualquier número como VDS-0001 */
 const fmtTicket = (n) => n ? `VDS-${String(n).padStart(4, '0')}` : '—';
 const fmtDateTime = r => {
-  const ts = r.date || "";
+  const ts = r.createdAt || r.date || "";
   if (!ts) return "—";
   if (ts.length <= 10) return ts; // solo fecha, sin conversión
   const utc = new Date(ts);
@@ -1072,7 +1072,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
         </div>
       )}
 
-      {showNewReport && <NewReportModal onClose={() => setSNR(false)} onSave={r => { const tn = nextTicketNum(reports); setReports(p => [...p, { ...r, id: Date.now(), ticketNum: tn, date: new Date().toISOString() }]); setSNR(false); }} vendors={vendors} mob={mob} />}
+      {showNewReport && <NewReportModal onClose={() => setSNR(false)} onSave={r => { const tn = nextTicketNum(reports); setReports(p => [...p, { ...r, id: Date.now(), ticketNum: tn, date: new Date().toISOString().slice(0,10), createdAt: new Date().toISOString() }]); setSNR(false); }} vendors={vendors} mob={mob} />}
     </div>
   );
 }
@@ -2136,7 +2136,7 @@ function ResidentApp({ user, reports, setReports, comprobantes, setComprobantes,
         {view === "nuevo" && (
           <ResidentReportForm
             user={user}
-            onSave={r => { const tn = nextTicketNum(reports); setReports(p => [...p, { ...r, id: Date.now(), ticketNum: tn, status: "pendiente", vendor: "", notes: "", date: new Date().toISOString() }]); setView("mis_reportes"); }}
+            onSave={r => { const tn = nextTicketNum(reports); setReports(p => [...p, { ...r, id: Date.now(), ticketNum: tn, status: "pendiente", vendor: "", notes: "", date: new Date().toISOString().slice(0,10), createdAt: new Date().toISOString() }]); setView("mis_reportes"); }}
           />
         )}
       </div>
