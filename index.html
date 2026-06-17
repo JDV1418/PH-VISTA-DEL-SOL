@@ -165,6 +165,33 @@ const PRIORITIES = [
   { id: "baja",  label: "🟢 Puede esperar", color: "#059669" },
 ];
 
+const AREAS_DEFAULT = [
+  { nombre: "Acceso Principal",    icono: "🚪", color: "#0d1b2a", grupo: "Acceso" },
+  { nombre: "Garita",              icono: "👮", color: "#0d1b2a", grupo: "Acceso" },
+  { nombre: "Lobby",               icono: "🏢", color: "#0d1b2a", grupo: "Acceso" },
+  { nombre: "Lobby de Servicio",   icono: "🔧", color: "#475569", grupo: "Acceso" },
+  { nombre: "Elevador 1",          icono: "🛗", color: "#0891b2", grupo: "Elevadores" },
+  { nombre: "Elevador 2",          icono: "🛗", color: "#0891b2", grupo: "Elevadores" },
+  { nombre: "Elevador de Servicio",icono: "🛗", color: "#0891b2", grupo: "Elevadores" },
+  { nombre: "E1",                  icono: "🅿️", color: "#475569", grupo: "Estacionamientos" },
+  { nombre: "E2",                  icono: "🅿️", color: "#475569", grupo: "Estacionamientos" },
+  { nombre: "E3",                  icono: "🅿️", color: "#475569", grupo: "Estacionamientos" },
+  { nombre: "E4",                  icono: "🅿️", color: "#475569", grupo: "Estacionamientos" },
+  { nombre: "E5",                  icono: "🅿️", color: "#475569", grupo: "Estacionamientos" },
+  { nombre: "E6",                  icono: "🅿️", color: "#475569", grupo: "Estacionamientos" },
+  { nombre: "Gimnasio",            icono: "🏋️", color: "#7c3aed", grupo: "Área Social" },
+  { nombre: "Sala de Fiestas",     icono: "🎉", color: "#7c3aed", grupo: "Área Social" },
+  { nombre: "Salón de Juegos",     icono: "🎮", color: "#7c3aed", grupo: "Área Social" },
+  { nombre: "Cancha de Basket",    icono: "🏀", color: "#7c3aed", grupo: "Área Social" },
+  { nombre: "Parque Externo",      icono: "🌳", color: "#059669", grupo: "Área Social" },
+  { nombre: "Cancha de Fútbol",    icono: "⚽", color: "#059669", grupo: "Área Social" },
+  { nombre: "Área de Piscina",     icono: "🏊", color: "#0891b2", grupo: "Área Social" },
+  { nombre: "Baño de Hombres AS",  icono: "🚹", color: "#2563eb", grupo: "Área Social" },
+  { nombre: "Baño de Mujeres AS",  icono: "🚺", color: "#db2777", grupo: "Área Social" },
+  ...Array.from({ length: 27 }, (_, i) => ({ nombre: `Piso ${i + 7}`, icono: "🏠", color: "#6366f1", grupo: "Pisos" })),
+  { nombre: "Azotea",              icono: "🌇", color: "#0d1b2a", grupo: "Techo" },
+];
+
 const FREQUENCIES = [
   { id: "diaria",      label: "Diaria",      icon: "📅", days: 1 },
   { id: "semanal",     label: "Semanal",     icon: "📆", days: 7 },
@@ -323,6 +350,8 @@ function App() {
   const fbInspections  = useCollection('inspections');
   const fbComprobantes = useCollection('comprobantes');
   const fbVotes        = useCollection('votes');
+  const fbAreas        = useCollection('areas');
+  const fbReady        = useFirebase();
   const [user, setUser] = useState(() => {
     try { const s = localStorage.getItem('vds_session'); return s ? JSON.parse(s) : null; } catch { return null; }
   });
@@ -341,6 +370,8 @@ function App() {
   const [inspections,  setInspectionsLocal]  = useState([]);
   const [comprobantes, setComprobantesLocal] = useState([]);
   const [votes,        setVotesLocal]        = useState([]);
+  const [areas,        setAreasLocal]        = useState([]);
+  const areasSeeded = useRef(false);
 
   useEffect(() => {
     if (!fbReports.length) return;
@@ -365,6 +396,22 @@ function App() {
   useEffect(() => { if (fbVotes.length) setVotesLocal(fbVotes); },
     // eslint-disable-next-line
     [fbVotes.map(v => (v._docId||v.id) + (v.respuestas||[]).length).join('|')]);
+  useEffect(() => {
+    if (!fbReady) return;
+    if (fbAreas.length > 0) {
+      // Deduplicar por nombre antes de guardar en estado
+      const seen = new Set();
+      const unique = fbAreas.filter(a => { if (seen.has(a.nombre)) return false; seen.add(a.nombre); return true; });
+      setAreasLocal(unique);
+      areasSeeded.current = true;
+      return;
+    }
+    if (areasSeeded.current) return;
+    if (localStorage.getItem('vds_areas_seeded')) return;
+    areasSeeded.current = true;
+    localStorage.setItem('vds_areas_seeded', '1');
+    AREAS_DEFAULT.forEach(a => fbAdd('areas', a));
+  }, [fbReady, fbAreas.length]);
 
   const setReports = async (updater) => {
     const prev = reports, next = typeof updater === 'function' ? updater(prev) : updater;
@@ -402,6 +449,12 @@ function App() {
     for (const v of prev) { if (v._docId && !next.find(x => x._docId === v._docId)) await fbDelete('votes', v._docId); }
     for (const v of next) { if (v._docId) { const o = prev.find(x => x._docId === v._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...v,_docId:''})) { const {_docId,...safe}=v; await fbUpdate('votes', v._docId, safe); } } }
   };
+  const setAreas = async (updater) => {
+    const prev = areas, next = typeof updater === 'function' ? updater(prev) : updater;
+    for (const a of next) { if (!a._docId) await fbAdd('areas', a); }
+    for (const a of prev) { if (a._docId && !next.find(x => x._docId === a._docId)) await fbDelete('areas', a._docId); }
+    for (const a of next) { if (a._docId) { const o = prev.find(x => x._docId === a._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...a,_docId:''})) { const {_docId,...safe}=a; await fbSetField('areas', a._docId, safe); } } }
+  };
 
   if (!user) return <LoginScreen onLogin={handleLogin} residents={residents} />;
   if (user.role === "junta") return <JuntaDashboard user={user} reports={reports} residents={residents} comprobantes={comprobantes} votes={votes} onLogout={handleLogout} />;
@@ -415,7 +468,7 @@ function App() {
     const rep = reports.find(r => (r._docId || r.id) === id);
     if (rep?._docId) fbSetField('reports', rep._docId, { archivado: false });
   };
-  return <AdminApp user={user} reports={reports} setReports={setReports} vendors={vendors} setVendors={setVendors} residents={residents} setResidents={setResidents} inspections={inspections} setInspections={setInspections} comprobantes={comprobantes} setComprobantes={setComprobantes} votes={votes} setVotes={setVotes} onArchiveReport={handleArchiveReport} onRestoreReport={handleRestoreReport} onLogout={handleLogout} />;
+  return <AdminApp user={user} reports={reports} setReports={setReports} vendors={vendors} setVendors={setVendors} residents={residents} setResidents={setResidents} inspections={inspections} setInspections={setInspections} comprobantes={comprobantes} setComprobantes={setComprobantes} votes={votes} setVotes={setVotes} areas={areas} setAreas={setAreas} onArchiveReport={handleArchiveReport} onRestoreReport={handleRestoreReport} onLogout={handleLogout} />;
 }
 
 /* ─── JUNTA DASHBOARD ─── */
@@ -889,7 +942,7 @@ function LoginScreen({ onLogin, residents }) {
 }
 
 /* ─── ADMIN APP ─── */
-function AdminApp({ user, reports, setReports, vendors, setVendors, residents, setResidents, inspections, setInspections, comprobantes, setComprobantes, votes, setVotes, onArchiveReport, onRestoreReport, onLogout }) {
+function AdminApp({ user, reports, setReports, vendors, setVendors, residents, setResidents, inspections, setInspections, comprobantes, setComprobantes, votes, setVotes, areas, setAreas, onArchiveReport, onRestoreReport, onLogout }) {
   const [view, setView]             = useState("dashboard");
   const [filterCat, setFC]          = useState("all");
   const [filterSta, setFS]          = useState("all");
@@ -909,6 +962,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
     { id: "comprobantes",  icon: "💳", label: "Comprobantes" },
     { id: "comunicados",   icon: "📢", label: "Comunicados" },
     { id: "votaciones",    icon: "🗳️", label: "Votaciones" },
+    { id: "areas",         icon: "📍", label: "Áreas" },
   ];
 
   const exportExcel = useCallback(() => {
@@ -1028,6 +1082,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
             <div style={{ fontWeight: 700, fontSize: mob ? 16 : 18, color: "#0f172a", letterSpacing: -0.3 }}>
               {view === "dashboard"    && "Panel Principal"}
               {view === "reports"      && (selectedReport ? selectedReport.title : "Gestión de Reportes")}
+              {view === "areas"       && "Áreas del Edificio"}
               {view === "vendors"      && "Proveedores"}
               {view === "inspecciones" && "Checklists de Inspección"}
               {view === "residentes"   && "Base de Residentes"}
@@ -1064,7 +1119,8 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           {view === "residentes"   && <ResidentesView residents={residents} setResidents={setResidents} reports={reports} comprobantes={comprobantes} setComprobantes={setComprobantes} showNew={showNewResident} setShowNew={setSNRes} mob={mob} />}
           {view === "votaciones"   && <VotacionesView votes={votes} setVotes={setVotes} residents={residents} user={user} mob={mob} />}
           {view === "comprobantes" && <ComprobantesAdmin comprobantes={comprobantes} setComprobantes={setComprobantes} residents={residents} mob={mob} />}
-          {view === "comunicados"   && <ComunicadosView residents={residents} mob={mob} />}
+          {view === "comunicados"  && <ComunicadosView residents={residents} mob={mob} />}
+          {view === "areas"        && <AreasView areas={areas} setAreas={setAreas} reports={reports} mob={mob} />}
         </div>
       </div>
 
@@ -1086,7 +1142,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
         </div>
       )}
 
-      {showNewReport && <NewReportModal onClose={() => setSNR(false)} onSave={r => { const tn = nextTicketNum(reports); setReports(p => [...p, { ...r, id: Date.now(), ticketNum: tn, date: new Date().toISOString().slice(0,10), createdAt: new Date().toISOString() }]); setSNR(false); }} vendors={vendors} mob={mob} />}
+      {showNewReport && <NewReportModal onClose={() => setSNR(false)} onSave={r => { const tn = nextTicketNum(reports); setReports(p => [...p, { ...r, id: Date.now(), ticketNum: tn, date: new Date().toISOString().slice(0,10), createdAt: new Date().toISOString() }]); setSNR(false); }} vendors={vendors} areas={areas} mob={mob} />}
     </div>
   );
 }
@@ -1100,6 +1156,7 @@ function AdminDashboard({ reports, vendors, setView, setFS, mob, printSummary })
     { label: "Resueltos",       value: reports.filter(r => r.status === "listo").length,       icon: "✅", color: "#10b981", bg: "#ecfdf5", status: "listo" },
   ];
   const byCat = CATS.map(c => ({ ...c, count: reports.filter(r => r.category === c.id).length })).filter(c => c.count > 0).sort((a,b) => b.count - a.count);
+  const byArea = Object.entries(reports.filter(r => r.ubicacion).reduce((acc, r) => { acc[r.ubicacion] = (acc[r.ubicacion] || 0) + 1; return acc; }, {})).map(([nombre, count]) => ({ nombre, count })).sort((a,b) => b.count - a.count).slice(0, 8);
   const urgent = reports.filter(r => r.priority === "alta" && r.status !== "listo");
   const card = { background: "#fff", borderRadius: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04)" };
 
@@ -1141,6 +1198,28 @@ function AdminDashboard({ reports, vendors, setView, setFS, mob, printSummary })
                   </div>
                   <div style={{ height: 6, background: "#f1f5f9", borderRadius: 4 }}>
                     <div style={{ height: "100%", width: `${reports.length > 0 ? (c.count / reports.length) * 100 : 0}%`, background: c.color, borderRadius: 4, transition: "width 0.5s" }} />
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+
+        {/* Reportes por Área */}
+        <div style={{ ...card, padding: mob ? 18 : 22 }}>
+          <div style={{ fontWeight: 700, fontSize: 14, color: "#0f172a", marginBottom: 18, letterSpacing: -0.2 }}>Reportes por Área</div>
+          {byArea.length === 0
+            ? <div style={{ color: "#94a3b8", fontSize: 13, textAlign: "center", padding: 20 }}>Sin reportes con área registrada</div>
+            : byArea.map((a, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 13 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: "#e0f2fe", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>📍</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 5 }}>
+                    <span style={{ fontWeight: 600, color: "#1e293b" }}>{a.nombre}</span>
+                    <span style={{ color: "#94a3b8", fontWeight: 600 }}>{a.count}</span>
+                  </div>
+                  <div style={{ height: 6, background: "#f1f5f9", borderRadius: 4 }}>
+                    <div style={{ height: "100%", width: `${byArea[0].count > 0 ? (a.count / byArea[0].count) * 100 : 0}%`, background: "#0891b2", borderRadius: 4, transition: "width 0.5s" }} />
                   </div>
                 </div>
               </div>
@@ -1290,6 +1369,7 @@ function ReportsTable({ reports, archivedReports = [], filterCat, setFC, filterS
                 <Badge status={r.status} />
                 <PriDot priority={r.priority} />
               </div>
+              {r.ubicacion && <div style={{ fontSize: 12, color: "#0891b2", fontWeight: 600, marginBottom: 2 }}>📍 {r.ubicacion}</div>}
               <div style={{ fontSize: 12, color: "#64748b" }}>Apto {r.apt} · {r.reporterName} · {fmtDateTime(r)}</div>
               {r.vendor && <div style={{ fontSize: 12, color: "#2563eb", marginTop: 4 }}>🏢 {r.vendor}</div>}
             </div>
@@ -1504,6 +1584,7 @@ function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob }) {
           <Card>
             <SectionTitle>Lo que reportó el residente</SectionTitle>
             <FInp label="Título" editing={editing} value={form.title} onChange={v => f("title", v)} />
+            <FInp label="Ubicación" editing={editing} value={form.ubicacion || ""} onChange={v => f("ubicacion", v)} placeholder="Ej: Lobby, Piso 12 - Área Común, Cocina - Apto 5-A" />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <FSel label="Categoría" editing={editing} value={form.category} onChange={v => f("category", v)} opts={CATS.map(c => ({ v: c.id, l: `${c.icon} ${c.label}` }))} />
               <FInp label="Apartamento" editing={editing} value={form.apt} onChange={v => f("apt", v)} />
@@ -2216,8 +2297,8 @@ function ResidentReportForm({ user, onSave }) {
 }
 
 /* ─── NEW REPORT MODAL ─── */
-function NewReportModal({ onClose, onSave, vendors, mob }) {
-  const [form, setForm] = useState({ title: "", category: "general", status: "pendiente", priority: "media", apt: "", reporterName: "", reporterPhone: "", date: new Date().toISOString().slice(0, 10), description: "", vendor: "", notes: "", images: [] });
+function NewReportModal({ onClose, onSave, vendors, areas, mob }) {
+  const [form, setForm] = useState({ title: "", category: "general", status: "pendiente", priority: "media", apt: "", ubicacion: "", reporterName: "", reporterPhone: "", date: new Date().toISOString().slice(0, 10), description: "", vendor: "", notes: "", images: [] });
   const fileRef = useRef();
   const f = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -2238,6 +2319,17 @@ function NewReportModal({ onClose, onSave, vendors, mob }) {
         </div>
         <div style={{ display: "grid", gridTemplateColumns: mob ? "1fr" : "1fr 1fr", gap: 12 }}>
           <div style={{ gridColumn: "1 / -1" }}><FInp label="Título *" editing value={form.title} onChange={v => f("title", v)} placeholder="Describe el problema" /></div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <label style={lblStyle}>Ubicación *</label>
+            <select value={form.ubicacion} onChange={e => f("ubicacion", e.target.value)} style={selStyle}>
+              <option value="">Selecciona un área...</option>
+              {Object.entries((areas || []).reduce((g, a) => { (g[a.grupo] = g[a.grupo] || []).push(a); return g; }, {})).map(([grupo, items]) => (
+                <optgroup key={grupo} label={grupo}>
+                  {items.map(a => <option key={a._docId || a.nombre} value={a.nombre}>{a.icono} {a.nombre}</option>)}
+                </optgroup>
+              ))}
+            </select>
+          </div>
           <FSel label="Categoría" editing value={form.category} onChange={v => f("category", v)} opts={CATS.map(c => ({ v: c.id, l: `${c.icon} ${c.label}` }))} />
           <FSel label="Prioridad" editing value={form.priority} onChange={v => f("priority", v)} opts={PRIORITIES.map(p => ({ v: p.id, l: p.label }))} />
           <FInp label="Apartamento *" editing value={form.apt} onChange={v => f("apt", v)} placeholder="Ej: 301" />
@@ -2267,7 +2359,7 @@ function NewReportModal({ onClose, onSave, vendors, mob }) {
         </div>
         <div style={{ display: "flex", gap: 10, marginTop: 20, justifyContent: "flex-end" }}>
           <button onClick={onClose} style={btnSec(mob)}>Cancelar</button>
-          <button onClick={() => { if (!form.title || !form.apt || !form.reporterName || !form.description) { alert("Completa los campos obligatorios (*)"); return; } onSave(form); }} style={btnPri(mob)}>Guardar Reporte</button>
+          <button onClick={() => { if (!form.title || !form.ubicacion || !form.apt || !form.reporterName || !form.description) { alert("Completa los campos obligatorios (*)"); return; } onSave(form); }} style={btnPri(mob)}>Guardar Reporte</button>
         </div>
       </div>
     </div>
@@ -4008,6 +4100,117 @@ const inpStyle = { width: "100%", background: "#f8fafc", border: "1px solid #e2e
 const lblStyle = { display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 5 };
 const btnPri = (mob) => ({ background: "#f97316", color: "#fff", border: "none", borderRadius: 8, padding: mob ? "9px 14px" : "10px 20px", fontWeight: 600, cursor: "pointer", fontSize: mob ? 12 : 13, fontFamily: "'Inter',sans-serif", letterSpacing: 0.2 });
 const btnSec = (mob) => ({ background: "#fff", color: "#475569", border: "1px solid #e2e8f0", borderRadius: 8, padding: mob ? "9px 14px" : "10px 20px", cursor: "pointer", fontSize: mob ? 12 : 13, fontFamily: "'Inter',sans-serif", fontWeight: 500 });
+
+/* ─── AREAS VIEW ─── */
+function AreasView({ areas, setAreas, reports, mob }) {
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId]     = useState(null);
+  const [form, setForm]         = useState({ nombre: "", icono: "📍", color: "#0891b2", grupo: "General" });
+  const [expandedGrupos, setExpandedGrupos] = useState({});
+  const f = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  const grupos = [...new Set((areas || []).map(a => a.grupo))].filter(Boolean);
+  const card   = { background: "#fff", borderRadius: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04)" };
+
+  const handleSave = () => {
+    if (!form.nombre.trim()) { alert("El nombre es obligatorio"); return; }
+    if (editId) setAreas(p => p.map(a => a._docId === editId ? { ...a, ...form } : a));
+    else        setAreas(p => [...p, { ...form, _docId: null }]);
+    setForm({ nombre: "", icono: "📍", color: "#0891b2", grupo: "General" });
+    setEditId(null); setShowForm(false);
+  };
+
+  const handleEdit = (a) => {
+    setForm({ nombre: a.nombre, icono: a.icono, color: a.color, grupo: a.grupo });
+    setEditId(a._docId); setShowForm(true);
+  };
+
+  const handleDelete = (a) => {
+    if (!window.confirm(`¿Eliminar "${a.nombre}"?`)) return;
+    setAreas(p => p.filter(x => x._docId !== a._docId));
+  };
+
+  const byGrupo  = (areas || []).reduce((g, a) => { (g[a.grupo] = g[a.grupo] || []).push(a); return g; }, {});
+  Object.values(byGrupo).forEach(items => items.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true })));
+  const totalRep = reports.filter(r => r.ubicacion).length;
+
+  const ROW = ({ a }) => {
+    const count = reports.filter(r => r.ubicacion === a.nombre).length;
+    return (
+      <div style={{ display: "flex", alignItems: "center", padding: "9px 16px", borderBottom: "1px solid #f1f5f9", gap: 12 }}>
+        <span style={{ fontSize: 16, width: 24, textAlign: "center", flexShrink: 0 }}>{a.icono}</span>
+        <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: "#1e293b" }}>{a.nombre}</span>
+        <span style={{ fontSize: 12, color: count > 0 ? "#0891b2" : "#cbd5e1", fontWeight: count > 0 ? 700 : 400, minWidth: 60, textAlign: "right" }}>
+          {count > 0 ? `${count} reporte${count > 1 ? "s" : ""}` : "—"}
+        </span>
+        <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+          <button onClick={() => handleEdit(a)} style={{ background: "#f1f5f9", border: "none", borderRadius: 6, padding: "4px 8px", cursor: "pointer", fontSize: 11, color: "#475569" }}>✏️</button>
+          <button onClick={() => handleDelete(a)} style={{ background: "#fef2f2", border: "none", borderRadius: 6, padding: "4px 8px", cursor: "pointer", fontSize: 11, color: "#dc2626" }}>🗑️</button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <div style={{ fontSize: 13, color: "#64748b" }}>{(areas || []).length} áreas · {totalRep} reportes con ubicación</div>
+        <button onClick={() => { setForm({ nombre: "", icono: "📍", color: "#0891b2", grupo: grupos[0] || "General" }); setEditId(null); setShowForm(true); }} style={btnPri(mob)}>+ Área</button>
+      </div>
+
+      {/* Formulario */}
+      {showForm && (
+        <div style={{ ...card, padding: 20, marginBottom: 16 }}>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 14 }}>{editId ? "✏️ Editar Área" : "📍 Nueva Área"}</div>
+          <div style={{ display: "grid", gridTemplateColumns: mob ? "1fr" : "1fr 1fr 80px 80px", gap: 10, alignItems: "end" }}>
+            <div>
+              <label style={lblStyle}>Nombre *</label>
+              <input value={form.nombre} onChange={e => f("nombre", e.target.value)} style={inpStyle} placeholder="Ej: Lobby" />
+            </div>
+            <div>
+              <label style={lblStyle}>Grupo</label>
+              <input value={form.grupo} onChange={e => f("grupo", e.target.value)} style={inpStyle} list="gl" placeholder="Ej: Acceso" />
+              <datalist id="gl">{grupos.map(g => <option key={g} value={g} />)}</datalist>
+            </div>
+            <div>
+              <label style={lblStyle}>Ícono</label>
+              <input value={form.icono} onChange={e => f("icono", e.target.value)} style={{ ...inpStyle, textAlign: "center" }} />
+            </div>
+            <div>
+              <label style={lblStyle}>Color</label>
+              <input type="color" value={form.color} onChange={e => f("color", e.target.value)} style={{ ...inpStyle, padding: 3, height: 38, cursor: "pointer" }} />
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8, marginTop: 14, justifyContent: "flex-end" }}>
+            <button onClick={() => { setShowForm(false); setEditId(null); }} style={btnSec(mob)}>Cancelar</button>
+            <button onClick={handleSave} style={btnPri(mob)}>Guardar</button>
+          </div>
+        </div>
+      )}
+
+      {/* Tabla por grupos */}
+      {Object.entries(byGrupo).map(([grupo, items]) => {
+        const esPisos    = grupo === "Pisos";
+        const expanded   = expandedGrupos[grupo] ?? !esPisos;
+        const grupoReps  = items.reduce((s, a) => s + reports.filter(r => r.ubicacion === a.nombre).length, 0);
+        return (
+          <div key={grupo} style={{ ...card, marginBottom: 10, overflow: "hidden" }}>
+            {/* Header del grupo */}
+            <div
+              onClick={() => setExpandedGrupos(p => ({ ...p, [grupo]: !expanded }))}
+              style={{ display: "flex", alignItems: "center", padding: "12px 16px", cursor: "pointer", borderBottom: expanded ? "1px solid #f1f5f9" : "none", background: "#fafafa" }}>
+              <span style={{ fontWeight: 700, fontSize: 13, color: "#0f172a", flex: 1 }}>{grupo}</span>
+              <span style={{ fontSize: 11, color: "#94a3b8", marginRight: 12 }}>{items.length} área{items.length > 1 ? "s" : ""}{grupoReps > 0 ? ` · ${grupoReps} reportes` : ""}</span>
+              <span style={{ color: "#94a3b8", fontSize: 12 }}>{expanded ? "▲" : "▼"}</span>
+            </div>
+            {/* Filas */}
+            {expanded && items.map(a => <ROW key={a._docId || a.nombre} a={a} />)}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
