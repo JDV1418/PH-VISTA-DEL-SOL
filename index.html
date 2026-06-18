@@ -1103,18 +1103,17 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
     const ordenados = [...reports].filter(r => !r.archivado).sort((a,b) => (a.date||"").localeCompare(b.date||""));
     for (let i = 0; i < ordenados.length; i++) {
       const r = ordenados[i];
-      if (r._docId) await fbUpdate(r._docId, "reports", { ticketNum: i + 1 });
+      if (r._docId) await fbSetField("reports", r._docId, { ticketNum: i + 1 });
     }
     setReports(p => {
       const sorted = [...p].filter(r => !r.archivado).sort((a,b) => (a.date||"").localeCompare(b.date||""));
       let idx = 1;
-      const updated = p.map(r => {
+      return p.map(r => {
         if (r.archivado) return r;
         const match = sorted.find(s => s._docId === r._docId);
         if (!match) return r;
         return { ...r, ticketNum: idx++ };
       });
-      return updated;
     });
     alert("✅ Reportes renumerados correctamente.");
   };
