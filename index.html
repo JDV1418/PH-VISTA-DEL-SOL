@@ -1105,16 +1105,6 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
       const r = ordenados[i];
       if (r._docId) await fbSetField("reports", r._docId, { ticketNum: i + 1 });
     }
-    setReports(p => {
-      const sorted = [...p].filter(r => !r.archivado).sort((a,b) => (a.date||"").localeCompare(b.date||""));
-      let idx = 1;
-      return p.map(r => {
-        if (r.archivado) return r;
-        const match = sorted.find(s => s._docId === r._docId);
-        if (!match) return r;
-        return { ...r, ticketNum: idx++ };
-      });
-    });
     alert("✅ Reportes renumerados correctamente.");
   };
   const archivedReports = reports.filter(r => r.archivado).sort((a,b) => (b.date||"").localeCompare(a.date||""));
