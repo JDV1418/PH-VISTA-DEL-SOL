@@ -723,6 +723,57 @@ function JuntaDashboard({ user, reports, residents, comprobantes, votes, onLogou
               }
             </div>
 
+            {/* Por Área — gráfico de pastel SVG */}
+            <div style={{ ...card }}>
+              <div style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", marginBottom: 16 }}>Por Área</div>
+              {(() => {
+                const areaColors = ["#3b82f6","#f59e0b","#10b981","#ef4444","#8b5cf6","#06b6d4","#dc2626","#84cc16","#f97316","#ec4899","#14b8a6","#a855f7","#64748b","#0ea5e9","#22c55e"];
+                const counts = {};
+                reports.forEach(r => { const a = r.ubicacion || "Sin área"; counts[a] = (counts[a]||0) + 1; });
+                const tot = reports.length || 1;
+                const pcts = Object.entries(counts)
+                  .sort((a,b) => b[1]-a[1])
+                  .map(([label, count], i) => ({ label, count, pct: Math.round(count/tot*100), color: areaColors[i % areaColors.length] }));
+                const cx = 60, cy = 60, r = 55;
+                let angle = -90;
+                const slices = pcts.map(p => {
+                  const start = angle;
+                  const sweep = (p.pct / 100) * 360;
+                  angle += sweep;
+                  const a1 = start * Math.PI/180, a2 = (start+sweep) * Math.PI/180;
+                  const x1 = cx + r*Math.cos(a1), y1 = cy + r*Math.sin(a1);
+                  const x2 = cx + r*Math.cos(a2), y2 = cy + r*Math.sin(a2);
+                  const large = sweep > 180 ? 1 : 0;
+                  return { ...p, d: `M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z` };
+                });
+                return pcts.length === 0
+                  ? <div style={{ color: "#94a3b8", fontSize: 13, textAlign: "center", padding: 16 }}>Sin datos aún</div>
+                  : (
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 20 }}>
+                    <svg width={120} height={120} viewBox="0 0 120 120" style={{ flexShrink: 0 }}>
+                      {pcts.length === 1
+                        ? <circle cx={cx} cy={cy} r={r} fill={pcts[0].color} />
+                        : slices.map((s, i) => <path key={i} d={s.d} fill={s.color} />)
+                      }
+                      <circle cx={cx} cy={cy} r={30} fill="#fff" />
+                      <text x={cx} y={cy+4} textAnchor="middle" fontSize={11} fontWeight="700" fill="#0f172a">{reports.length}</text>
+                      <text x={cx} y={cy+15} textAnchor="middle" fontSize={7} fill="#94a3b8">total</text>
+                    </svg>
+                    <div style={{ flex: 1, maxHeight: 160, overflowY: "auto" }}>
+                      {pcts.map((p, i) => (
+                        <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                          <div style={{ width: 10, height: 10, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
+                          <div style={{ flex: 1, fontSize: 12, color: "#475569" }}>{p.label}</div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: p.color }}>{p.pct}%</div>
+                          <div style={{ fontSize: 11, color: "#94a3b8" }}>({p.count})</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
             {/* Por Prioridad — gráfico de pastel SVG */}
             <div style={{ ...card }}>
               <div style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", marginBottom: 16 }}>Por Prioridad</div>
