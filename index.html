@@ -1101,14 +1101,12 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
     win.print();
   };
 
-  const [showCancelados, setShowCancelados] = React.useState(false);
   const [confirmModal, setConfirmModal] = React.useState(null); // { mensaje, onConfirm }
 
   const filteredReports = reports.filter(r => {
     const q = filterTxt.toLowerCase().trim();
     const matchTxt = !q || [r.title, r.description, r.apt, r.reporterName, r.notes, r.vendor].some(f => (f||"").toLowerCase().includes(q));
     if (r.archivado) return false;
-    if (!showCancelados && r.status === "cancelado" && filterSta !== "cancelado") return false;
     return matchTxt &&
       (filterCat === "all" || r.category === filterCat) &&
       (filterSta === "all" || r.status === filterSta);
@@ -1215,7 +1213,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           {view === "reports" && (
             selectedReport
               ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { onArchiveReport(id); setSR(null); }} vendors={vendors} mob={mob} setConfirmModal={setConfirmModal} />
-              : <ReportsTable reports={filteredReports} archivedReports={archivedReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => { onRestoreReport(id); }} mob={mob} showCancelados={showCancelados} setShowCancelados={setShowCancelados} handleRenumerar={handleRenumerar} />
+              : <ReportsTable reports={filteredReports} archivedReports={archivedReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => { onRestoreReport(id); }} mob={mob} handleRenumerar={handleRenumerar} />
           )}
           {view === "inspecciones" && <InspeccionesView inspections={inspections} setInspections={setInspections} user={user} mob={mob} />}
           {view === "vendors"      && <VendorsView vendors={vendors} setVendors={setVendors} reports={reports} showNew={showNewVendor} setShowNew={setSNV} mob={mob} />}
@@ -1398,7 +1396,7 @@ function AdminDashboard({ reports, vendors, setView, setFS, mob, printSummary })
 }
 
 /* ─── REPORTS TABLE ─── */
-function ReportsTable({ reports, archivedReports = [], filterCat, setFC, filterSta, setFS, filterTxt, setFT, onSelect, onRestore, mob, showCancelados, setShowCancelados, handleRenumerar }) {
+function ReportsTable({ reports, archivedReports = [], filterCat, setFC, filterSta, setFS, filterTxt, setFT, onSelect, onRestore, mob, handleRenumerar }) {
   const [showArchive, setShowArchive] = useState(false);
 
   if (showArchive) {
@@ -1456,9 +1454,6 @@ function ReportsTable({ reports, archivedReports = [], filterCat, setFC, filterS
           {STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
         </select>
         {filterTxt && <button onClick={() => setFT("")} style={{ background: "#fef2f2", border: "1px solid #dc262633", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", color: "#dc2626", fontFamily: "'Inter',sans-serif", whiteSpace: "nowrap" }}>✕ Limpiar</button>}
-        <button onClick={() => setShowCancelados(p => !p)} style={{ background: showCancelados ? "#fff1f1" : "#f1f5f9", border: `1px solid ${showCancelados ? "#dc262655" : "#e2e8f0"}`, borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", color: showCancelados ? "#dc2626" : "#64748b", fontFamily: "'Inter',sans-serif", whiteSpace: "nowrap", fontWeight: showCancelados ? 700 : 400 }}>
-          {showCancelados ? "🔴 Ocultar cancelados" : "⭕ Ver cancelados"}
-        </button>
         <button onClick={handleRenumerar} style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", color: "#475569", fontFamily: "'Inter',sans-serif", whiteSpace: "nowrap" }}>🔢 Renumerar</button>
         <div style={{ color: "#64748b", fontSize: 12, alignSelf: "center", whiteSpace: "nowrap" }}>{reports.length} reporte{reports.length !== 1 ? "s" : ""}</div>
       </div>
