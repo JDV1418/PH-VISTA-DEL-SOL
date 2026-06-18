@@ -1550,9 +1550,10 @@ function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob, setCo
               const upd = { ...form, status: "cancelado" };
               setForm(upd);
               onUpdate(upd);
-              if (report._docId && window.__fbSetField) window.__fbSetField('reports', report._docId, { status: "cancelado" });
+              if (report._docId && window.__fbSetField) window.__fbSetField('reports', report._docId, { status: "cancelado", archivado: true });
               if (window.__fbLog) window.__fbLog('cancelar_reporte', { ticket: fmtTicket(form.ticketNum), titulo: form.title, apt: form.apt });
-              setConfirmModal(null);
+              onArchive(report._docId || report.id);
+              setConfirmModal({ mensaje: `El reporte ${fmtTicket(form.ticketNum)} fue cancelado y archivado automáticamente.`, onConfirm: () => { setConfirmModal(null); onBack(); }, soloOk: true });
             }
           })} style={{ ...btnSec(mob), color: "#dc2626", borderColor: "#dc2626" }}>✕ Cancelar reporte</button>
         )}
