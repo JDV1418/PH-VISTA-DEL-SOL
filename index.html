@@ -1011,7 +1011,8 @@ function LoginScreen({ onLogin, residents }) {
 
 /* ─── ADMIN APP ─── */
 function AdminApp({ user, reports, setReports, vendors, setVendors, residents, setResidents, inspections, setInspections, comprobantes, setComprobantes, votes, setVotes, areas, setAreas, onArchiveReport, onRestoreReport, onLogout }) {
-  const [view, setView]             = useState("dashboard");
+  const [view, setView]             = useState(() => localStorage.getItem('vds_last_view') || "dashboard");
+  const setViewPersisted = (v) => { localStorage.setItem('vds_last_view', v); setView(v); };
   const [filterCat, setFC]          = useState("all");
   const [filterSta, setFS]          = useState("all");
   const [filterTxt, setFT]          = useState("");
@@ -1158,7 +1159,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
             <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>46 Apartamentos</div>
           </div>
           {navItems.map(item => (
-            <button key={item.id} onClick={() => { setView(item.id); setSR(null); }} style={{
+            <button key={item.id} onClick={() => { setViewPersisted(item.id); setSR(null); }} style={{
               background: view === item.id ? "rgba(249,115,22,0.12)" : "transparent",
               border: "none", color: view === item.id ? "#f97316" : "#94a3b8",
               padding: "12px 20px", display: "flex", alignItems: "center", gap: 11,
@@ -1212,7 +1213,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
 
         {/* SCROLL AREA */}
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: mob ? "16px 14px 32px" : "24px 28px", width: "100%" }}>
-          {view === "dashboard" && <AdminDashboard reports={reports} vendors={vendors} setView={(v) => { setView(v); setSR(null); }} setFS={setFS} mob={mob} printSummary={printSummary} />}
+          {view === "dashboard" && <AdminDashboard reports={reports} vendors={vendors} setView={(v) => { setViewPersisted(v); setSR(null); }} setFS={setFS} mob={mob} printSummary={printSummary} />}
           {view === "reports" && (
             selectedReport
               ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { onArchiveReport(id); setSR(null); }} vendors={vendors} mob={mob} setConfirmModal={setConfirmModal} />
@@ -1233,7 +1234,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
         <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#0d1b2a", borderTop: "1px solid rgba(255,255,255,0.07)", zIndex: 100, paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
           <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.ceil(navItems.length/2)}, 1fr)` }}>
             {navItems.map(item => (
-              <button key={item.id} onClick={() => { setView(item.id); setSR(null); }} style={{
+              <button key={item.id} onClick={() => { setViewPersisted(item.id); setSR(null); }} style={{
                 background: "transparent", border: "none", padding: "6px 2px",
                 color: view === item.id ? "#f97316" : "#475569", cursor: "pointer", fontFamily: "'Inter',sans-serif",
                 borderBottom: view === item.id ? "2px solid #f97316" : "2px solid transparent"
@@ -1269,7 +1270,7 @@ function AdminDashboard({ reports, vendors, setView, setFS, mob, printSummary })
       {/* Stat cards */}
       <div style={{ display: "grid", gridTemplateColumns: mob ? "1fr 1fr" : "repeat(4,1fr)", gap: 14, marginBottom: 22 }}>
         {stats.map(s => (
-          <div key={s.label} onClick={() => { setFS(s.status || "all"); setView("reports"); }}
+          <div key={s.label} onClick={() => { setFS(s.status || "all"); setViewPersisted("reports"); }}
             style={{ ...card, padding: mob ? "16px 14px" : "20px", cursor: "pointer", transition: "transform 0.12s, box-shadow 0.12s" }}
             onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)"; }}
             onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = card.boxShadow; }}>
