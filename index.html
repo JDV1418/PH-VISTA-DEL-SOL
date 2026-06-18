@@ -480,9 +480,10 @@ function App() {
     if (rep?._docId) fbSetField('reports', rep._docId, { archivado: true });
   };
   const handleRestoreReport = (id) => {
-    setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: false } : r));
+    setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: false, status: "pendiente" } : r));
     const rep = reports.find(r => (r._docId || r.id) === id);
-    if (rep?._docId) fbSetField('reports', rep._docId, { archivado: false });
+    if (rep?._docId) fbSetField('reports', rep._docId, { archivado: false, status: "pendiente" });
+    if (window.__fbLog) window.__fbLog('reactivar_reporte', { ticket: fmtTicket(rep?.ticketNum), titulo: rep?.title, apt: rep?.apt });
   };
   return <AdminApp user={user} reports={reports} setReports={setReports} vendors={vendors} setVendors={setVendors} residents={residents} setResidents={setResidents} inspections={inspections} setInspections={setInspections} comprobantes={comprobantes} setComprobantes={setComprobantes} votes={votes} setVotes={setVotes} areas={areas} setAreas={setAreas} onArchiveReport={handleArchiveReport} onRestoreReport={handleRestoreReport} onLogout={handleLogout} />;
 }
@@ -1215,7 +1216,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           {view === "reports" && (
             selectedReport
               ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { onArchiveReport(id); setSR(null); }} vendors={vendors} mob={mob} setConfirmModal={setConfirmModal} />
-              : <ReportsTable reports={filteredReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => { onRestoreReport(id); if (window.__fbLog) window.__fbLog('reactivar_reporte', { docId: id }); }} mob={mob} handleRenumerar={handleRenumerar} />
+              : <ReportsTable reports={filteredReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => { onRestoreReport(id); }} mob={mob} handleRenumerar={handleRenumerar} />
           )}
           {view === "inspecciones" && <InspeccionesView inspections={inspections} setInspections={setInspections} user={user} mob={mob} />}
           {view === "vendors"      && <VendorsView vendors={vendors} setVendors={setVendors} reports={reports} showNew={showNewVendor} setShowNew={setSNV} mob={mob} />}
@@ -1416,7 +1417,8 @@ function ReportsTable({ reports, filterCat, setFC, filterSta, setFS, filterTxt, 
         </select>
         <select value={filterSta} onChange={e => setFS(e.target.value)} style={selStyle}>
           <option value="all">Todos los estados</option>
-          {STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+          <option value="pendiente">Por Asignar</option>
+          <option value="en_proceso">En Proceso</option>
           <option value="archivado">📦 Archivado</option>
         </select>
         {filterTxt && <button onClick={() => setFT("")} style={{ background: "#fef2f2", border: "1px solid #dc262633", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", color: "#dc2626", fontFamily: "'Inter',sans-serif", whiteSpace: "nowrap" }}>✕ Limpiar</button>}
