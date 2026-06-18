@@ -1108,7 +1108,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
     const q = filterTxt.toLowerCase().trim();
     const matchTxt = !q || [r.title, r.description, r.apt, r.reporterName, r.notes, r.vendor].some(f => (f||"").toLowerCase().includes(q));
     if (r.archivado) return false;
-    if (!showCancelados && r.status === "cancelado") return false;
+    if (!showCancelados && r.status === "cancelado" && filterSta !== "cancelado") return false;
     return matchTxt &&
       (filterCat === "all" || r.category === filterCat) &&
       (filterSta === "all" || r.status === filterSta);
