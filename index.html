@@ -1103,13 +1103,16 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
 
   const [confirmModal, setConfirmModal] = React.useState(null); // { mensaje, onConfirm }
 
+  const [notifModal, setNotifModal] = React.useState(null); // { mensaje }
+
   const filteredReports = reports.filter(r => {
     const q = filterTxt.toLowerCase().trim();
     const matchTxt = !q || [r.title, r.description, r.apt, r.reporterName, r.notes, r.vendor].some(f => (f||"").toLowerCase().includes(q));
-    if (r.archivado) return false;
-    return matchTxt &&
+    if (filterSta === "archivado") return r.archivado && matchTxt && (filterCat === "all" || r.category === filterCat);
+    if (filterSta === "all") return matchTxt && (filterCat === "all" || r.category === filterCat);
+    return !r.archivado && matchTxt &&
       (filterCat === "all" || r.category === filterCat) &&
-      (filterSta === "all" || r.status === filterSta);
+      r.status === filterSta;
   }).sort((a,b) => (a.ticketNum||0) - (b.ticketNum||0));
 
   const handleRenumerar = () => {
@@ -1126,7 +1129,6 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
       }
     });
   };
-  const archivedReports = reports.filter(r => r.archivado).sort((a,b) => (b.date||"").localeCompare(a.date||""));
 
   return (
     <div style={{ display: "flex", height: "100dvh", fontFamily: "'Inter',sans-serif", background: "#f0f4f8", color: "#1e293b", flexDirection: mob ? "column" : "row" }}>
@@ -1135,12 +1137,12 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
       {confirmModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: "#fff", borderRadius: 16, padding: 32, maxWidth: 380, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-            <div style={{ fontSize: 22, marginBottom: 12 }}>⚠️</div>
-            <div style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", marginBottom: 10 }}>¿Estás segura?</div>
+            <div style={{ fontSize: 22, marginBottom: 12 }}>{confirmModal.soloOk ? "✅" : "⚠️"}</div>
+            <div style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", marginBottom: 10 }}>{confirmModal.soloOk ? "Acción completada" : "¿Estás segura?"}</div>
             <div style={{ fontSize: 13, color: "#475569", marginBottom: 24, lineHeight: 1.6 }}>{confirmModal.mensaje}</div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button onClick={() => setConfirmModal(null)} style={{ background: "#f1f5f9", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 600, color: "#475569" }}>Cancelar</button>
-              <button onClick={confirmModal.onConfirm} style={{ background: "#0d1b2a", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 700, color: "#fff" }}>Confirmar</button>
+              {!confirmModal.soloOk && <button onClick={() => setConfirmModal(null)} style={{ background: "#f1f5f9", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 600, color: "#475569" }}>Cancelar</button>}
+              <button onClick={confirmModal.onConfirm} style={{ background: "#0d1b2a", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 700, color: "#fff" }}>OK</button>
             </div>
           </div>
         </div>
@@ -1213,7 +1215,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           {view === "reports" && (
             selectedReport
               ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { onArchiveReport(id); setSR(null); }} vendors={vendors} mob={mob} setConfirmModal={setConfirmModal} />
-              : <ReportsTable reports={filteredReports} archivedReports={archivedReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => { onRestoreReport(id); }} mob={mob} handleRenumerar={handleRenumerar} />
+              : <ReportsTable reports={filteredReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => { onRestoreReport(id); if (window.__fbLog) window.__fbLog('reactivar_reporte', { docId: id }); }} mob={mob} handleRenumerar={handleRenumerar} />
           )}
           {view === "inspecciones" && <InspeccionesView inspections={inspections} setInspections={setInspections} user={user} mob={mob} />}
           {view === "vendors"      && <VendorsView vendors={vendors} setVendors={setVendors} reports={reports} showNew={showNewVendor} setShowNew={setSNV} mob={mob} />}
@@ -1396,46 +1398,9 @@ function AdminDashboard({ reports, vendors, setView, setFS, mob, printSummary })
 }
 
 /* ─── REPORTS TABLE ─── */
-function ReportsTable({ reports, archivedReports = [], filterCat, setFC, filterSta, setFS, filterTxt, setFT, onSelect, onRestore, mob, handleRenumerar }) {
-  const [showArchive, setShowArchive] = useState(false);
-
-  if (showArchive) {
-    return (
-      <div>
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-          <button onClick={() => setShowArchive(false)} style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: "#f1f5f9", color: "#64748b", fontWeight: 700, cursor: "pointer", fontSize: 13, fontFamily: "'Inter',sans-serif" }}>📋 Activos ({reports.length})</button>
-          <button style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: "#d97706", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13, fontFamily: "'Inter',sans-serif" }}>📦 Archivo ({archivedReports.length})</button>
-        </div>
-        {archivedReports.length === 0
-          ? <div style={{ background: "#fff", borderRadius: 12, padding: 48, textAlign: "center", color: "#94a3b8" }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>📦</div>
-              <div style={{ fontWeight: 600 }}>Sin reportes archivados</div>
-              <div style={{ fontSize: 12, marginTop: 4 }}>Los reportes archivados aparecerán aquí.</div>
-            </div>
-          : archivedReports.map((r, i) => (
-              <div key={r._docId || r.id || i} style={{ background: "#fff", borderRadius: 12, padding: mob ? 14 : 18, marginBottom: 10, boxShadow: "0 1px 4px rgba(0,0,0,0.05)", borderLeft: "4px solid #d97706", opacity: 0.85 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 11, color: "#d97706", fontWeight: 700, marginBottom: 2 }}>{fmtTicket(r.ticketNum || r.id)}</div>
-                    <div style={{ fontWeight: 600, fontSize: 14, color: "#1e293b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
-                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 3 }}>Apto {r.apt} · {r.reporterName} · {fmtDateTime(r)}</div>
-                    <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{cat(r.category).icon} {cat(r.category).label} · {sta(r.status).label}</div>
-                  </div>
-                  <button onClick={() => onRestore && onRestore(r._docId || r.id)} style={{ background: "#f0fdf4", color: "#059669", border: "1px solid #059669", borderRadius: 8, padding: "6px 12px", fontSize: 11, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 600, flexShrink: 0 }}>↩ Restaurar</button>
-                </div>
-              </div>
-            ))
-        }
-      </div>
-    );
-  }
-
+function ReportsTable({ reports, filterCat, setFC, filterSta, setFS, filterTxt, setFT, onSelect, onRestore, mob, handleRenumerar }) {
   return (
     <div>
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <button style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: "#0d1b2a", color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 13, fontFamily: "'Inter',sans-serif" }}>📋 Activos ({reports.length})</button>
-        <button onClick={() => setShowArchive(true)} style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: "#f1f5f9", color: "#64748b", fontWeight: 700, cursor: "pointer", fontSize: 13, fontFamily: "'Inter',sans-serif" }}>📦 Archivo ({archivedReports.length})</button>
-      </div>
       {/* Filters */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         <input
@@ -1452,6 +1417,7 @@ function ReportsTable({ reports, archivedReports = [], filterCat, setFC, filterS
         <select value={filterSta} onChange={e => setFS(e.target.value)} style={selStyle}>
           <option value="all">Todos los estados</option>
           {STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+          <option value="archivado">📦 Archivado</option>
         </select>
         {filterTxt && <button onClick={() => setFT("")} style={{ background: "#fef2f2", border: "1px solid #dc262633", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", color: "#dc2626", fontFamily: "'Inter',sans-serif", whiteSpace: "nowrap" }}>✕ Limpiar</button>}
         <button onClick={handleRenumerar} style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", color: "#475569", fontFamily: "'Inter',sans-serif", whiteSpace: "nowrap" }}>🔢 Renumerar</button>
@@ -1483,7 +1449,7 @@ function ReportsTable({ reports, archivedReports = [], filterCat, setFC, filterS
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#f0f4f8", borderBottom: "2px solid #e2e8f0" }}>
-                {["Ticket","Título","Categoría","Apto","Reportado por","Fecha","Prioridad","Estado","Proveedor"].map(h => (
+                {["Ticket","Título","Categoría","Apto","Reportado por","Fecha","Prioridad","Estado","Proveedor",""].map(h => (
                   <th key={h} style={{ padding: "11px 14px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
                 ))}
               </tr>
@@ -1501,8 +1467,9 @@ function ReportsTable({ reports, archivedReports = [], filterCat, setFC, filterS
                   <td style={{ padding: "11px 14px", fontSize: 13 }}>{r.reporterName}</td>
                   <td style={{ padding: "11px 14px", fontSize: 12, color: "#64748b" }}>{fmtDateTime(r)}</td>
                   <td style={{ padding: "11px 14px" }}><PriDot priority={r.priority} /></td>
-                  <td style={{ padding: "11px 14px" }}><Badge status={r.status} /></td>
+                  <td style={{ padding: "11px 14px" }}><Badge status={r.status} />{r.archivado && <span style={{ marginLeft: 6, fontSize: 10, color: "#d97706", fontWeight: 700 }}>📦</span>}</td>
                   <td style={{ padding: "11px 14px", fontSize: 12, color: r.vendor ? "#0f172a" : "#d1d5db" }}>{r.vendor || "—"}</td>
+                  <td style={{ padding: "11px 14px" }}>{r.archivado && <button onClick={e => { e.stopPropagation(); onRestore && onRestore(r._docId || r.id); }} style={{ background: "#f0fdf4", color: "#059669", border: "1px solid #059669", borderRadius: 7, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 600 }}>↩ Reactivar</button>}</td>
                 </tr>
               ))}
             </tbody>
@@ -1586,10 +1553,6 @@ function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob, setCo
             }
           })} style={{ ...btnSec(mob), color: "#dc2626", borderColor: "#dc2626" }}>✕ Cancelar reporte</button>
         )}
-        <button onClick={() => setConfirmModal && setConfirmModal({
-          mensaje: `¿Archivar el reporte "${report.title}"? Quedará guardado en el archivo y no aparecerá en la lista activa.`,
-          onConfirm: () => { onArchive(report._docId || report.id); setConfirmModal(null); }
-        })} style={{ ...btnSec(mob), color: "#d97706", borderColor: "#d97706" }}>📦 Archivar</button>
       </div>
 
       {/* ── PANEL ADMINISTRATIVO (siempre editable) ── */}
@@ -1604,7 +1567,19 @@ function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob, setCo
               {STATUSES.map(s => {
                 const active = form.status === s.id;
                 return (
-                  <button key={s.id} onClick={() => { const upd = { ...form, status: s.id }; setForm(upd); onUpdate(upd); }}
+                  <button key={s.id} onClick={() => {
+                    const upd = { ...form, status: s.id };
+                    setForm(upd); onUpdate(upd);
+                    if ((s.id === "listo" || s.id === "cancelado") && !form.archivado) {
+                      onArchive(report._docId || report.id);
+                      if (window.__fbLog) window.__fbLog('auto_archivar', { ticket: fmtTicket(form.ticketNum), titulo: form.title, motivo: s.label });
+                      if (setConfirmModal) setConfirmModal({
+                        mensaje: `El reporte ${fmtTicket(form.ticketNum)} fue marcado como ${s.label} y archivado automáticamente.`,
+                        onConfirm: () => { setConfirmModal(null); onBack(); },
+                        soloOk: true,
+                      });
+                    }
+                  }}
                     style={{ background: active ? s.bg : "rgba(255,255,255,0.06)", border: `2px solid ${active ? s.color : "rgba(255,255,255,0.1)"}`, color: active ? s.color : "#64748b", borderRadius: 8, padding: "9px 12px", cursor: "pointer", fontWeight: active ? 700 : 400, fontSize: 12, fontFamily: "'Inter',sans-serif", textAlign: "left", transition: "all 0.15s" }}>
                     {s.label}
                   </button>
