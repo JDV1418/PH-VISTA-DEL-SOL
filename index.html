@@ -1572,7 +1572,7 @@ function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob, setCo
                   <button key={s.id} onClick={() => {
                     const upd = { ...form, status: s.id };
                     setForm(upd); onUpdate(upd);
-                    if ((s.id === "listo" || s.id === "cancelado") && !form.archivado) {
+                    if ((s.id === "listo" || s.id === "cancelado") && !report.archivado) {
                       onArchive(report._docId || report.id);
                       if (window.__fbLog) window.__fbLog('auto_archivar', { ticket: fmtTicket(form.ticketNum), titulo: form.title, motivo: s.label });
                       if (setConfirmModal) setConfirmModal({
