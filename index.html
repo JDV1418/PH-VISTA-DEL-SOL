@@ -133,6 +133,18 @@
       await updateDoc(doc(window.__db, collName, docId), fields);
     };
 
+    const fbLog = async (accion, detalle = {}) => {
+      if (!window.__db) return;
+      const { collection, addDoc } = window.__fs;
+      await addDoc(collection(window.__db, 'logs'), {
+        accion,
+        detalle,
+        fecha: new Date().toISOString(),
+        usuario: 'Administradora',
+      });
+    };
+    window.__fbLog = fbLog;
+
     const fbDelete = async (collName, docId) => {
       if (!window.__db || !docId) return;
       const { doc, deleteDoc } = window.__fs;
@@ -461,6 +473,8 @@ function App() {
   if (user.role === "junta") return <JuntaDashboard user={user} reports={reports} residents={residents} comprobantes={comprobantes} votes={votes} onLogout={handleLogout} />;
   const handleArchiveReport = (id) => {
     setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: true } : r));
+    const rep2 = reports.find(r => (r._docId || r.id) === id);
+    if (window.__fbLog) window.__fbLog('archivar_reporte', { ticket: fmtTicket(rep2?.ticketNum), titulo: rep2?.title, apt: rep2?.apt });
     const rep = reports.find(r => (r._docId || r.id) === id);
     if (rep?._docId) fbSetField('reports', rep._docId, { archivado: true });
   };
@@ -1087,6 +1101,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
   };
 
   const [showCancelados, setShowCancelados] = React.useState(false);
+  const [confirmModal, setConfirmModal] = React.useState(null); // { mensaje, onConfirm }
 
   const filteredReports = reports.filter(r => {
     const q = filterTxt.toLowerCase().trim();
@@ -1098,19 +1113,40 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
       (filterSta === "all" || r.status === filterSta);
   }).sort((a,b) => (a.ticketNum||0) - (b.ticketNum||0));
 
-  const handleRenumerar = async () => {
-    if (!window.confirm("¿Renumerar todos los reportes en orden de fecha? Esto actualizará los números en Firestore.")) return;
-    const ordenados = [...reports].filter(r => !r.archivado).sort((a,b) => (a.date||"").localeCompare(b.date||""));
-    for (let i = 0; i < ordenados.length; i++) {
-      const r = ordenados[i];
-      if (r._docId) await fbSetField("reports", r._docId, { ticketNum: i + 1 });
-    }
-    alert("✅ Reportes renumerados correctamente.");
+  const handleRenumerar = () => {
+    setConfirmModal({
+      mensaje: "¿Renumerar todos los reportes en orden de fecha? Los números de ticket se actualizarán en el sistema.",
+      onConfirm: async () => {
+        const ordenados = [...reports].filter(r => !r.archivado).sort((a,b) => (a.date||"").localeCompare(b.date||""));
+        for (let i = 0; i < ordenados.length; i++) {
+          const r = ordenados[i];
+          if (r._docId) await fbSetField("reports", r._docId, { ticketNum: i + 1 });
+        }
+        if (window.__fbLog) window.__fbLog('renumerar_reportes', { total: ordenados.length });
+        setConfirmModal(null);
+      }
+    });
   };
   const archivedReports = reports.filter(r => r.archivado).sort((a,b) => (b.date||"").localeCompare(a.date||""));
 
   return (
     <div style={{ display: "flex", height: "100dvh", fontFamily: "'Inter',sans-serif", background: "#f0f4f8", color: "#1e293b", flexDirection: mob ? "column" : "row" }}>
+
+      {/* MODAL DE CONFIRMACIÓN */}
+      {confirmModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "#fff", borderRadius: 16, padding: 32, maxWidth: 380, width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+            <div style={{ fontSize: 22, marginBottom: 12 }}>⚠️</div>
+            <div style={{ fontWeight: 700, fontSize: 15, color: "#0f172a", marginBottom: 10 }}>¿Estás segura?</div>
+            <div style={{ fontSize: 13, color: "#475569", marginBottom: 24, lineHeight: 1.6 }}>{confirmModal.mensaje}</div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button onClick={() => setConfirmModal(null)} style={{ background: "#f1f5f9", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 600, color: "#475569" }}>Cancelar</button>
+              <button onClick={confirmModal.onConfirm} style={{ background: "#0d1b2a", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 700, color: "#fff" }}>Confirmar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* DESKTOP SIDEBAR */}
       {!mob && (
         <div style={{ width: 220, background: "#0d1b2a", color: "#fff", display: "flex", flexDirection: "column", flexShrink: 0 }}>
@@ -1177,7 +1213,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           {view === "dashboard" && <AdminDashboard reports={reports} vendors={vendors} setView={(v) => { setView(v); setSR(null); }} setFS={setFS} mob={mob} printSummary={printSummary} />}
           {view === "reports" && (
             selectedReport
-              ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { onArchiveReport(id); setSR(null); }} vendors={vendors} mob={mob} />
+              ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { onArchiveReport(id); setSR(null); }} vendors={vendors} mob={mob} setConfirmModal={setConfirmModal} />
               : <ReportsTable reports={filteredReports} archivedReports={archivedReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => { onRestoreReport(id); }} mob={mob} showCancelados={showCancelados} setShowCancelados={setShowCancelados} handleRenumerar={handleRenumerar} />
           )}
           {view === "inspecciones" && <InspeccionesView inspections={inspections} setInspections={setInspections} user={user} mob={mob} />}
@@ -1482,7 +1518,7 @@ function ReportsTable({ reports, archivedReports = [], filterCat, setFC, filterS
 }
 
 /* ─── REPORT DETAIL ─── */
-function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob }) {
+function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob, setConfirmModal }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ ...report });
   const [lightbox, setLightbox] = useState(null);
@@ -1541,14 +1577,10 @@ function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob }) {
               <button onClick={() => { setForm({ ...report }); setEditing(false); }} style={btnSec(mob)}>Cancelar</button>
             </>
         }
-        {confirmArchive
-          ? <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <span style={{ fontSize: 12, color: "#d97706", fontWeight: 600 }}>¿Archivar reporte?</span>
-              <button onClick={() => { onArchive(report._docId || report.id); setConfirmArchive(false); }} style={{ background: "#d97706", color: "#fff", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 700 }}>Sí</button>
-              <button onClick={() => setConfirmArchive(false)} style={{ background: "#f1f5f9", color: "#475569", border: "none", borderRadius: 8, padding: "7px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>No</button>
-            </div>
-          : <button onClick={() => setConfirmArchive(true)} style={{ ...btnSec(mob), color: "#d97706", borderColor: "#d97706" }}>📦 Archivar</button>
-        }
+        <button onClick={() => setConfirmModal && setConfirmModal({
+          mensaje: `¿Archivar el reporte "${report.title}"? Quedará guardado en el archivo y no aparecerá en la lista activa.`,
+          onConfirm: () => { onArchive(report._docId || report.id); setConfirmModal(null); }
+        })} style={{ ...btnSec(mob), color: "#d97706", borderColor: "#d97706" }}>📦 Archivar</button>
       </div>
 
       {/* ── PANEL ADMINISTRATIVO (siempre editable) ── */}
