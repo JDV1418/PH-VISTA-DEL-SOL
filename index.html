@@ -1111,7 +1111,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
     const q = filterTxt.toLowerCase().trim();
     const matchTxt = !q || [r.title, r.description, r.apt, r.reporterName, r.notes, r.vendor].some(f => (f||"").toLowerCase().includes(q));
     if (filterSta === "archivado") return r.archivado && matchTxt && (filterCat === "all" || r.category === filterCat);
-    if (filterSta === "all") return !r.archivado && r.status !== "cancelado" && r.status !== "listo" && matchTxt && (filterCat === "all" || r.category === filterCat);
+    if (filterSta === "all") return !r.archivado && matchTxt && (filterCat === "all" || r.category === filterCat);
     return !r.archivado && matchTxt &&
       (filterCat === "all" || r.category === filterCat) &&
       r.status === filterSta;
