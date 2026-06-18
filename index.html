@@ -4154,13 +4154,17 @@ const btnSec = (mob) => ({ background: "#fff", color: "#475569", border: "1px so
 
 /* ─── AREAS VIEW ─── */
 function AreasView({ areas, setAreas, reports, mob }) {
-  const [showForm, setShowForm] = useState(false);
-  const [editId, setEditId]     = useState(null);
-  const [form, setForm]         = useState({ nombre: "", icono: "📍", color: "#0891b2", grupo: "General" });
+  const [showForm, setShowForm]       = useState(false);
+  const [editId, setEditId]           = useState(null);
+  const [form, setForm]               = useState({ nombre: "", icono: "📍", color: "#0891b2", grupo: "General" });
   const [expandedGrupos, setExpandedGrupos] = useState({});
+  const [selectedArea, setSelectedArea] = useState(null);
   const f = (k, v) => setForm(p => ({ ...p, [k]: v }));
   const grupos = [...new Set((areas || []).map(a => a.grupo))].filter(Boolean);
   const card   = { background: "#fff", borderRadius: 14, boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04)" };
+
+  const priColor = { alta: "#ef4444", media: "#f97316", baja: "#eab308" };
+  const priLabel = { alta: "Urgente", media: "Importante", baja: "Puede esperar" };
 
   const handleSave = () => {
     if (!form.nombre.trim()) { alert("El nombre es obligatorio"); return; }
@@ -4184,13 +4188,49 @@ function AreasView({ areas, setAreas, reports, mob }) {
   Object.values(byGrupo).forEach(items => items.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true })));
   const totalRep = reports.filter(r => r.ubicacion).length;
 
+  // Vista rápida de reportes por área
+  if (selectedArea) {
+    const areaReports = reports.filter(r => r.ubicacion === selectedArea.nombre)
+      .sort((a, b) => { const o = { alta: 0, media: 1, baja: 2 }; return (o[a.priority]??3) - (o[b.priority]??3); });
+    return (
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+          <button onClick={() => setSelectedArea(null)} style={{ background: "#f1f5f9", border: "none", borderRadius: 8, padding: "7px 14px", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#475569" }}>← Volver</button>
+          <span style={{ fontSize: 16 }}>{selectedArea.icono}</span>
+          <span style={{ fontWeight: 700, fontSize: 17, color: "#0f172a" }}>{selectedArea.nombre}</span>
+          <span style={{ fontSize: 12, color: "#94a3b8" }}>{areaReports.length} reporte{areaReports.length !== 1 ? "s" : ""}</span>
+        </div>
+        {areaReports.length === 0
+          ? <div style={{ ...card, padding: 32, textAlign: "center", color: "#94a3b8", fontSize: 14 }}>No hay reportes en esta área</div>
+          : areaReports.map((r, i) => (
+            <div key={r._docId || i} style={{ ...card, padding: "14px 18px", marginBottom: 10, display: "flex", alignItems: "center", gap: 14, borderLeft: `4px solid ${priColor[r.priority] || "#cbd5e1"}` }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: priColor[r.priority] || "#cbd5e1", flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600, fontSize: 14, color: "#0f172a" }}>{r.title}</div>
+                <div style={{ fontSize: 12, color: "#64748b", marginTop: 3 }}>{r.date} · {r.reporterName || "—"} · Apto {r.apt}</div>
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: priColor[r.priority] || "#94a3b8", background: `${priColor[r.priority]}18`, borderRadius: 6, padding: "3px 8px", flexShrink: 0 }}>
+                {priLabel[r.priority] || r.priority}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    );
+  }
+
   const ROW = ({ a }) => {
     const count = reports.filter(r => r.ubicacion === a.nombre).length;
     return (
       <div style={{ display: "flex", alignItems: "center", padding: "9px 16px", borderBottom: "1px solid #f1f5f9", gap: 12 }}>
         <span style={{ fontSize: 16, width: 24, textAlign: "center", flexShrink: 0 }}>{a.icono}</span>
-        <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: "#1e293b" }}>{a.nombre}</span>
-        <span style={{ fontSize: 12, color: count > 0 ? "#0891b2" : "#cbd5e1", fontWeight: count > 0 ? 700 : 400, minWidth: 60, textAlign: "right" }}>
+        <span
+          onClick={() => count > 0 && setSelectedArea(a)}
+          style={{ flex: 1, fontSize: 13, fontWeight: 500, color: "#1e293b", cursor: count > 0 ? "pointer" : "default" }}
+        >{a.nombre}</span>
+        <span
+          onClick={() => count > 0 && setSelectedArea(a)}
+          style={{ fontSize: 12, color: count > 0 ? "#0891b2" : "#cbd5e1", fontWeight: count > 0 ? 700 : 400, minWidth: 60, textAlign: "right", cursor: count > 0 ? "pointer" : "default" }}>
           {count > 0 ? `${count} reporte${count > 1 ? "s" : ""}` : "—"}
         </span>
         <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
