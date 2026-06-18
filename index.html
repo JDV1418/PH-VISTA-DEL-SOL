@@ -1577,6 +1577,17 @@ function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob, setCo
               <button onClick={() => { setForm({ ...report }); setEditing(false); }} style={btnSec(mob)}>Cancelar</button>
             </>
         }
+        {report.status !== "cancelado" && (
+          <button onClick={() => setConfirmModal && setConfirmModal({
+            mensaje: `¿Cancelar el reporte "${report.title}"? Quedará visible en la lista con estado Cancelado.`,
+            onConfirm: () => {
+              const upd = { ...form, status: "cancelado" };
+              setForm(upd); onUpdate(upd);
+              if (window.__fbLog) window.__fbLog('cancelar_reporte', { ticket: fmtTicket(form.ticketNum), titulo: form.title, apt: form.apt });
+              setConfirmModal(null);
+            }
+          })} style={{ ...btnSec(mob), color: "#dc2626", borderColor: "#dc2626" }}>✕ Cancelar reporte</button>
+        )}
         <button onClick={() => setConfirmModal && setConfirmModal({
           mensaje: `¿Archivar el reporte "${report.title}"? Quedará guardado en el archivo y no aparecerá en la lista activa.`,
           onConfirm: () => { onArchive(report._docId || report.id); setConfirmModal(null); }
