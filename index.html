@@ -144,6 +144,7 @@
       });
     };
     window.__fbLog = fbLog;
+    window.__fbSetField = fbSetField;
 
     const fbDelete = async (collName, docId) => {
       if (!window.__db || !docId) return;
@@ -1582,7 +1583,9 @@ function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob, setCo
             mensaje: `¿Cancelar el reporte "${report.title}"? Quedará visible en la lista con estado Cancelado.`,
             onConfirm: () => {
               const upd = { ...form, status: "cancelado" };
-              setForm(upd); onUpdate(upd);
+              setForm(upd);
+              onUpdate(upd);
+              if (report._docId && window.__fbSetField) window.__fbSetField('reports', report._docId, { status: "cancelado" });
               if (window.__fbLog) window.__fbLog('cancelar_reporte', { ticket: fmtTicket(form.ticketNum), titulo: form.title, apt: form.apt });
               setConfirmModal(null);
             }
