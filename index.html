@@ -1443,6 +1443,7 @@ function ReportsTable({ reports, filterCat, setFC, filterSta, setFS, filterTxt, 
               {r.ubicacion && <div style={{ fontSize: 12, color: "#0891b2", fontWeight: 600, marginBottom: 2 }}>📍 {r.ubicacion}</div>}
               <div style={{ fontSize: 12, color: "#64748b" }}>Apto {r.apt} · {r.reporterName} · {fmtDateTime(r)}</div>
               {r.vendor && <div style={{ fontSize: 12, color: "#2563eb", marginTop: 4 }}>🏢 {r.vendor}</div>}
+              {r.archivado && <button onClick={e => { e.stopPropagation(); onRestore && onRestore(r._docId || r.id); }} style={{ marginTop: 10, background: "#f0fdf4", color: "#059669", border: "1px solid #059669", borderRadius: 7, padding: "6px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 600, width: "100%" }}>↩ Reactivar</button>}
             </div>
           ))}
         </div>
