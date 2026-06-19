@@ -143,9 +143,6 @@
         usuario: 'Administradora',
       });
     };
-    window.__fbLog = fbLog;
-    window.__fbSetField = fbSetField;
-
     const fbDelete = async (collName, docId) => {
       if (!window.__db || !docId) return;
       const { doc, deleteDoc } = window.__fs;
@@ -475,7 +472,7 @@ function App() {
   const handleArchiveReport = (id) => {
     setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: true } : r));
     const rep2 = reports.find(r => (r._docId || r.id) === id);
-    if (window.__fbLog) window.__fbLog('archivar_reporte', { ticket: fmtTicket(rep2?.ticketNum), titulo: rep2?.title, apt: rep2?.apt });
+    fbLog('archivar_reporte', { ticket: fmtTicket(rep2?.ticketNum), titulo: rep2?.title, apt: rep2?.apt });
     const rep = reports.find(r => (r._docId || r.id) === id);
     if (rep?._docId) fbSetField('reports', rep._docId, { archivado: true });
   };
@@ -483,7 +480,7 @@ function App() {
     setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: false, status: "pendiente" } : r));
     const rep = reports.find(r => (r._docId || r.id) === id);
     if (rep?._docId) fbSetField('reports', rep._docId, { archivado: false, status: "pendiente" });
-    if (window.__fbLog) window.__fbLog('reactivar_reporte', { ticket: fmtTicket(rep?.ticketNum), titulo: rep?.title, apt: rep?.apt });
+    fbLog('reactivar_reporte', { ticket: fmtTicket(rep?.ticketNum), titulo: rep?.title, apt: rep?.apt });
   };
   return <AdminApp user={user} reports={reports} setReports={setReports} vendors={vendors} setVendors={setVendors} residents={residents} setResidents={setResidents} inspections={inspections} setInspections={setInspections} comprobantes={comprobantes} setComprobantes={setComprobantes} votes={votes} setVotes={setVotes} areas={areas} setAreas={setAreas} onArchiveReport={handleArchiveReport} onRestoreReport={handleRestoreReport} onLogout={handleLogout} />;
 }
@@ -1126,7 +1123,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           const r = ordenados[i];
           if (r._docId) await fbSetField("reports", r._docId, { ticketNum: i + 1 });
         }
-        if (window.__fbLog) window.__fbLog('renumerar_reportes', { total: ordenados.length });
+        fbLog('renumerar_reportes', { total: ordenados.length });
         setConfirmModal(null);
       }
     });
@@ -1551,8 +1548,8 @@ function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob, setCo
               const upd = { ...form, status: "cancelado" };
               setForm(upd);
               onUpdate(upd);
-              if (report._docId && window.__fbSetField) window.__fbSetField('reports', report._docId, { status: "cancelado", archivado: true });
-              if (window.__fbLog) window.__fbLog('cancelar_reporte', { ticket: fmtTicket(form.ticketNum), titulo: form.title, apt: form.apt });
+              if (report._docId) fbSetField('reports', report._docId, { status: "cancelado", archivado: true });
+              fbLog('cancelar_reporte', { ticket: fmtTicket(form.ticketNum), titulo: form.title, apt: form.apt });
               onArchive(report._docId || report.id);
               setConfirmModal({ mensaje: `El reporte ${fmtTicket(form.ticketNum)} fue cancelado y archivado automáticamente.`, onConfirm: () => { setConfirmModal(null); onBack(); }, soloOk: true });
             }
@@ -1577,7 +1574,7 @@ function ReportDetail({ report, onBack, onUpdate, onArchive, vendors, mob, setCo
                     setForm(upd); onUpdate(upd);
                     if ((s.id === "listo" || s.id === "cancelado") && !report.archivado) {
                       onArchive(report._docId || report.id);
-                      if (window.__fbLog) window.__fbLog('auto_archivar', { ticket: fmtTicket(form.ticketNum), titulo: form.title, motivo: s.label });
+                      fbLog('auto_archivar', { ticket: fmtTicket(form.ticketNum), titulo: form.title, motivo: s.label });
                       if (setConfirmModal) setConfirmModal({
                         mensaje: `El reporte ${fmtTicket(form.ticketNum)} fue marcado como ${s.label} y archivado automáticamente.`,
                         onConfirm: () => { setConfirmModal(null); onBack(); },
