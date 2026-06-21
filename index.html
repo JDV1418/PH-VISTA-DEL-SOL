@@ -1891,7 +1891,7 @@ function _AdminDashboard_OLD({ reports, vendors, setView, setFS, mob, printSumma
 }
 
 /* ─── REPORTS AREA DASH ─── */
-function ReportsAreaDash({ reports, onSelect, onRestore, mob, handleRenumerar }) {
+function ReportsAreaDash({ reports = [], onSelect, onRestore, mob, handleRenumerar }) {
   const [subView, setSubView] = useState("dash");
   const [selCat, setSelCat] = useState(null);
 
@@ -1975,16 +1975,26 @@ function ReportsAreaDash({ reports, onSelect, onRestore, mob, handleRenumerar })
       {/* Category grid */}
       <div className="rad-grid">
         {CATS.map(c => {
-          const reps   = reports.filter(r => r.category === c.id);
-          const ap     = reps.filter(r => r.status === "pendiente").length;
-          const ae     = reps.filter(r => r.status === "en_proceso").length;
-          const al     = reps.filter(r => r.status === "listo").length;
-          const recent = reps.find(r => r.status === "pendiente") || reps.find(r => r.status === "en_proceso") || reps[0];
+          const reps    = reports.filter(r => r.category === c.id);
+          const active  = reps.filter(r => !r.archivado);
+          const arch    = reps.filter(r => r.archivado).length;
+          const ap      = active.filter(r => r.status === "pendiente").length;
+          const ae      = active.filter(r => r.status === "en_proceso").length;
+          const al      = active.filter(r => r.status === "listo").length;
+          const recent  = active.find(r => r.status === "pendiente") || active.find(r => r.status === "en_proceso") || active[0];
           return (
             <div key={c.id} className="rad-widget" onClick={() => { setSelCat(c.id); setSubView("area"); }}>
               <div style={{ fontSize: 26, marginBottom: 10 }}>{c.icon}</div>
               <div className="rad-w-name" style={{ color: c.color }}>{c.label}</div>
-              <div className="rad-w-num"  style={{ color: c.color }}>{reps.length}</div>
+              <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginBottom: 8 }}>
+                <div className="rad-w-num" style={{ color: c.color, marginBottom: 0 }}>{active.length}</div>
+                {arch > 0 && (
+                  <div style={{ fontSize: 16, fontWeight: 700, color: "rgba(0,0,0,0.32)", lineHeight: 1, marginBottom: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>arch.</span>
+                    <span>{arch}</span>
+                  </div>
+                )}
+              </div>
               <div className="rad-w-pills">
                 {ap > 0 && <span className="rad-pill">{ap} pendiente{ap > 1 ? "s" : ""}</span>}
                 {ae > 0 && <span className="rad-pill">{ae} en proceso</span>}
