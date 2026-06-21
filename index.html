@@ -140,6 +140,39 @@
       #act-grid{grid-template-columns:1fr 1fr!important}
       .act-hide-mobile{display:flex!important}
     }
+    /* ─── REPORTS AREA DASH ─── */
+    .rad-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+    .rad-sum-card{background:#fff;border-radius:16px;padding:16px 18px;box-shadow:0 1px 2px rgba(0,0,0,0.03),0 3px 12px rgba(0,0,0,0.05);display:flex;align-items:center;gap:14px}
+    .rad-sum-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .rad-sum-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:#9a9ab0;margin-bottom:3px}
+    .rad-sum-val{font-size:24px;font-weight:800;letter-spacing:-0.8px;line-height:1}
+    .rad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .rad-widget{background:#e4e6e5;border-radius:26px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.03),0 3px 14px rgba(0,0,0,0.06);cursor:pointer;position:relative;transition:transform 0.16s,box-shadow 0.16s;-webkit-tap-highlight-color:transparent;user-select:none}
+    .rad-widget:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,0.10)}
+    .rad-widget:active{transform:scale(0.97)}
+    .rad-w-name{font-size:14px;font-weight:700;margin-bottom:4px;padding-right:28px}
+    .rad-w-num{font-size:34px;font-weight:800;letter-spacing:-1.2px;line-height:1;margin-bottom:8px}
+    .rad-w-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+    .rad-pill{background:rgba(0,0,0,0.09);color:rgba(0,0,0,0.60);border-radius:20px;padding:3px 9px;font-size:10.5px;font-weight:700;white-space:nowrap}
+    .rad-w-div{height:1px;margin-bottom:10px;opacity:0.32}
+    .rad-w-rec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:rgba(0,0,0,0.36);margin-bottom:4px}
+    .rad-w-rec{font-size:12px;color:rgba(0,0,0,0.54);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .rad-w-arr{position:absolute;bottom:14px;right:14px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.09);display:flex;align-items:center;justify-content:center;font-size:12px;color:rgba(0,0,0,0.45)}
+    .rad-area-hdr{background:#fff;border-radius:18px;padding:16px 20px;box-shadow:0 1px 2px rgba(0,0,0,0.03),0 3px 12px rgba(0,0,0,0.05);margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .rad-back{background:none;border:1px solid #e2e8f0;border-radius:10px;padding:7px 13px;font-size:13px;font-weight:500;color:#5a6478;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.12s;flex-shrink:0}
+    .rad-back:hover{background:#f8fafc}
+    .rad-rep-list{display:flex;flex-direction:column;gap:10px}
+    .rad-rep-card{background:#fff;border-radius:16px;padding:15px 17px;box-shadow:0 1px 2px rgba(0,0,0,0.03),0 3px 12px rgba(0,0,0,0.05);cursor:pointer;transition:transform 0.12s,box-shadow 0.12s;-webkit-tap-highlight-color:transparent}
+    .rad-rep-card:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(0,0,0,0.09)}
+    .rad-rep-card:active{transform:scale(0.98)}
+    @media(max-width:700px){
+      .rad-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+      .rad-sum{gap:8px}
+      .rad-sum-card{padding:12px 13px;gap:10px}
+      .rad-sum-ico{width:34px;height:34px;font-size:16px}
+      .rad-sum-val{font-size:20px}
+      .rad-w-num{font-size:26px}
+    }
   </style>
 </head>
 <body>
@@ -1675,7 +1708,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           {view === "reports" && (
             selectedReport
               ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { onArchiveReport(id); setSR(null); }} vendors={vendors} mob={mob} setConfirmModal={setConfirmModal} />
-              : <ReportsTable reports={filteredReports} filterCat={filterCat} setFC={setFC} filterSta={filterSta} setFS={setFS} filterTxt={filterTxt} setFT={setFT} onSelect={setSR} onRestore={id => { onRestoreReport(id); }} mob={mob} handleRenumerar={handleRenumerar} />
+              : <ReportsAreaDash reports={reports} onSelect={setSR} onRestore={id => { onRestoreReport(id); }} mob={mob} handleRenumerar={handleRenumerar} />
           )}
           {view === "inspecciones" && <InspeccionesView inspections={inspections} setInspections={setInspections} user={user} mob={mob} />}
           {view === "vendors"      && <VendorsView vendors={vendors} setVendors={setVendors} reports={reports} showNew={showNewVendor} setShowNew={setSNV} mob={mob} />}
@@ -1857,87 +1890,114 @@ function _AdminDashboard_OLD({ reports, vendors, setView, setFS, mob, printSumma
   );
 }
 
-/* ─── REPORTS TABLE ─── */
-function ReportsTable({ reports, filterCat, setFC, filterSta, setFS, filterTxt, setFT, onSelect, onRestore, mob, handleRenumerar }) {
-  return (
-    <div>
-      {/* Filters */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        <input
-          type="text"
-          value={filterTxt}
-          onChange={e => setFT(e.target.value)}
-          placeholder="🔍 Buscar por título, apto, residente..."
-          style={{ ...selStyle, flex: 1, minWidth: mob ? "100%" : 260 }}
-        />
-        <select value={filterCat} onChange={e => setFC(e.target.value)} style={selStyle}>
-          <option value="all">Todas las categorías</option>
-          {CATS.map(c => <option key={c.id} value={c.id}>{c.icon} {c.label}</option>)}
-        </select>
-        <select value={filterSta} onChange={e => setFS(e.target.value)} style={selStyle}>
-          <option value="all">Todos los estados</option>
-          <option value="pendiente">Por Asignar</option>
-          <option value="en_proceso">En Proceso</option>
-          <option value="archivado">📦 Archivado</option>
-        </select>
-        {filterTxt && <button onClick={() => setFT("")} style={{ background: "#fef2f2", border: "1px solid #dc262633", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", color: "#dc2626", fontFamily: "'Inter',sans-serif", whiteSpace: "nowrap" }}>✕ Limpiar</button>}
-        <button onClick={handleRenumerar} style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 8, padding: "6px 12px", fontSize: 12, cursor: "pointer", color: "#475569", fontFamily: "'Inter',sans-serif", whiteSpace: "nowrap" }}>🔢 Renumerar</button>
-        <div style={{ color: "#64748b", fontSize: 12, alignSelf: "center", whiteSpace: "nowrap" }}>{reports.length} reporte{reports.length !== 1 ? "s" : ""}</div>
-      </div>
+/* ─── REPORTS AREA DASH ─── */
+function ReportsAreaDash({ reports, onSelect, onRestore, mob, handleRenumerar }) {
+  const [subView, setSubView] = useState("dash");
+  const [selCat, setSelCat] = useState(null);
 
-      {mob ? (
-        /* MOBILE: Card list */
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {reports.length === 0 && <div style={{ textAlign: "center", color: "#64748b", padding: 40, fontSize: 14 }}>Sin reportes para estos filtros</div>}
-          {reports.map(r => (
-            <div key={r.id} onClick={() => onSelect(r)} style={{ background: "#fff", borderRadius: 10, padding: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", borderLeft: `4px solid ${cat(r.category).color}`, cursor: "pointer" }}>
-              <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#64748b", marginBottom: 4 }}>{fmtTicket(r.ticketNum || r.id)}</div>
-              <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 6 }}>{r.title}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
-                <CatChip category={r.category} />
+  const total  = reports.filter(r => r.status !== "listo" && r.status !== "cancelado" && !r.archivado).length;
+  const pend   = reports.filter(r => r.status === "pendiente").length;
+  const proc   = reports.filter(r => r.status === "en_proceso").length;
+
+  /* ── AREA SUB-VIEW ── */
+  if (subView === "area" && selCat) {
+    const area    = CATS.find(c => c.id === selCat) || { id: selCat, label: selCat, icon: "📋", color: "#6b7280" };
+    const aReps   = reports.filter(r => r.category === selCat);
+    const ap = aReps.filter(r => r.status === "pendiente").length;
+    const ae = aReps.filter(r => r.status === "en_proceso").length;
+    const al = aReps.filter(r => r.status === "listo").length;
+    const pillSt  = { background: "rgba(0,0,0,0.07)", color: "rgba(0,0,0,0.6)", borderRadius: 20, padding: "3px 9px", fontSize: 11, fontWeight: 700 };
+    return (
+      <div>
+        <div className="rad-area-hdr">
+          <button className="rad-back" onClick={() => setSubView("dash")}>← Volver</button>
+          <div style={{ fontSize: 28 }}>{area.icon}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 800, fontSize: 17, color: "#0f172a", letterSpacing: -0.3 }}>{area.label}</div>
+            <div style={{ fontSize: 12, color: "#9a9ab0", marginTop: 2 }}>{aReps.length} reporte{aReps.length !== 1 ? "s" : ""} en total</div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+              {ap > 0 && <span style={pillSt}>{ap} por asignar</span>}
+              {ae > 0 && <span style={pillSt}>{ae} en proceso</span>}
+              {al > 0 && <span style={pillSt}>{al} resuelto{al > 1 ? "s" : ""}</span>}
+            </div>
+          </div>
+        </div>
+        <div className="rad-rep-list">
+          {aReps.length === 0 && (
+            <div style={{ textAlign: "center", padding: 50, color: "#b0b0c0", fontSize: 14, background: "#fff", borderRadius: 16 }}>
+              Sin reportes en esta categoría
+            </div>
+          )}
+          {aReps.map(r => (
+            <div key={r.id} className="rad-rep-card" onClick={() => onSelect(r)}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, marginBottom: 7 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: "#0f172a", flex: 1 }}>{r.title}</div>
+                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#9a9ab0", background: "#f5f5f8", borderRadius: 7, padding: "3px 8px", whiteSpace: "nowrap", flexShrink: 0 }}>{fmtTicket(r.ticketNum || r.id)}</span>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 6 }}>
                 <Badge status={r.status} />
                 <PriDot priority={r.priority} />
               </div>
-              {r.ubicacion && <div style={{ fontSize: 12, color: "#0891b2", fontWeight: 600, marginBottom: 2 }}>📍 {r.ubicacion}</div>}
-              <div style={{ fontSize: 12, color: "#64748b" }}>Apto {r.apt} · {r.reporterName} · {fmtDateTime(r)}</div>
-              {r.vendor && <div style={{ fontSize: 12, color: "#2563eb", marginTop: 4 }}>🏢 {r.vendor}</div>}
-              {r.archivado && <button onClick={e => { e.stopPropagation(); onRestore && onRestore(r._docId || r.id); }} style={{ marginTop: 10, background: "#f0fdf4", color: "#059669", border: "1px solid #059669", borderRadius: 7, padding: "6px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 600, width: "100%" }}>↩ Reactivar</button>}
+              {r.ubicacion && <div style={{ fontSize: 12, color: "#0891b2", fontWeight: 600, marginBottom: 4 }}>📍 {r.ubicacion}</div>}
+              <div style={{ fontSize: 12, color: "#9a9ab0" }}>Apto {r.apt} · {r.reporterName} · {fmtDateTime(r)}{r.vendor ? ` · 🏢 ${r.vendor}` : ""}</div>
+              {r.archivado && (
+                <button onClick={e => { e.stopPropagation(); onRestore && onRestore(r._docId || r.id); }}
+                  style={{ marginTop: 10, background: "#f0fdf4", color: "#059669", border: "1px solid #059669", borderRadius: 8, padding: "6px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 600, width: "100%" }}>
+                  ↩ Reactivar
+                </button>
+              )}
             </div>
           ))}
         </div>
-      ) : (
-        /* DESKTOP: Table */
-        <div style={{ background: "#fff", borderRadius: 10, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ background: "#f0f4f8", borderBottom: "2px solid #e2e8f0" }}>
-                {["Ticket","Título","Categoría","Apto","Reportado por","Fecha","Prioridad","Estado","Proveedor",""].map(h => (
-                  <th key={h} style={{ padding: "11px 14px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {reports.length === 0 && <tr><td colSpan={9} style={{ textAlign: "center", padding: 40, color: "#64748b", fontSize: 13 }}>Sin reportes para estos filtros</td></tr>}
-              {reports.map(r => (
-                <tr key={r.id} onClick={() => onSelect(r)} style={{ borderBottom: "1px solid #f0f4f8", cursor: "pointer" }}
-                  onMouseEnter={e => e.currentTarget.style.background = "#f8fafc"}
-                  onMouseLeave={e => e.currentTarget.style.background = ""}>
-                  <td style={{ padding: "11px 14px", fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: "#64748b", whiteSpace: "nowrap" }}>{fmtTicket(r.ticketNum || r.id)}</td>
-                  <td style={{ padding: "11px 14px", fontWeight: 600, fontSize: 13, maxWidth: 220 }}><div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div></td>
-                  <td style={{ padding: "11px 14px" }}><CatChip category={r.category} /></td>
-                  <td style={{ padding: "11px 14px", fontSize: 13 }}>{r.apt}</td>
-                  <td style={{ padding: "11px 14px", fontSize: 13 }}>{r.reporterName}</td>
-                  <td style={{ padding: "11px 14px", fontSize: 12, color: "#64748b" }}>{fmtDateTime(r)}</td>
-                  <td style={{ padding: "11px 14px" }}><PriDot priority={r.priority} /></td>
-                  <td style={{ padding: "11px 14px" }}><Badge status={r.status} />{r.archivado && <span style={{ marginLeft: 6, fontSize: 10, color: "#d97706", fontWeight: 700 }}>📦</span>}</td>
-                  <td style={{ padding: "11px 14px", fontSize: 12, color: r.vendor ? "#0f172a" : "#d1d5db" }}>{r.vendor || "—"}</td>
-                  <td style={{ padding: "11px 14px" }}>{r.archivado && <button onClick={e => { e.stopPropagation(); onRestore && onRestore(r._docId || r.id); }} style={{ background: "#f0fdf4", color: "#059669", border: "1px solid #059669", borderRadius: 7, padding: "4px 10px", fontSize: 11, cursor: "pointer", fontFamily: "'Inter',sans-serif", fontWeight: 600 }}>↩ Reactivar</button>}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      </div>
+    );
+  }
+
+  /* ── DASHBOARD VIEW ── */
+  return (
+    <div>
+      {/* Summary row */}
+      <div className="rad-sum">
+        <div className="rad-sum-card">
+          <div className="rad-sum-ico" style={{ background: "#d4f0e0" }}>📊</div>
+          <div><div className="rad-sum-lbl">Activos</div><div className="rad-sum-val" style={{ color: "#1a6b3a" }}>{total}</div></div>
         </div>
-      )}
+        <div className="rad-sum-card">
+          <div className="rad-sum-ico" style={{ background: "#f5c0c0" }}>⏳</div>
+          <div><div className="rad-sum-lbl">Por Asignar</div><div className="rad-sum-val" style={{ color: "#a82020" }}>{pend}</div></div>
+        </div>
+        <div className="rad-sum-card">
+          <div className="rad-sum-ico" style={{ background: "#fdd8b0" }}>🔄</div>
+          <div><div className="rad-sum-lbl">En Proceso</div><div className="rad-sum-val" style={{ color: "#c06020" }}>{proc}</div></div>
+        </div>
+      </div>
+
+      {/* Category grid */}
+      <div className="rad-grid">
+        {CATS.map(c => {
+          const reps   = reports.filter(r => r.category === c.id);
+          const ap     = reps.filter(r => r.status === "pendiente").length;
+          const ae     = reps.filter(r => r.status === "en_proceso").length;
+          const al     = reps.filter(r => r.status === "listo").length;
+          const recent = reps.find(r => r.status === "pendiente") || reps.find(r => r.status === "en_proceso") || reps[0];
+          return (
+            <div key={c.id} className="rad-widget" onClick={() => { setSelCat(c.id); setSubView("area"); }}>
+              <div style={{ fontSize: 26, marginBottom: 10 }}>{c.icon}</div>
+              <div className="rad-w-name" style={{ color: c.color }}>{c.label}</div>
+              <div className="rad-w-num"  style={{ color: c.color }}>{reps.length}</div>
+              <div className="rad-w-pills">
+                {ap > 0 && <span className="rad-pill">{ap} pendiente{ap > 1 ? "s" : ""}</span>}
+                {ae > 0 && <span className="rad-pill">{ae} en proceso</span>}
+                {al > 0 && <span className="rad-pill">{al} resuelto{al > 1 ? "s" : ""}</span>}
+              </div>
+              <div className="rad-w-div" style={{ background: c.color }}></div>
+              <div className="rad-w-rec-lbl">Último reporte</div>
+              <div className="rad-w-rec">{recent ? recent.title : "Sin reportes"}</div>
+              <div className="rad-w-arr">→</div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
