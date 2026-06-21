@@ -47,6 +47,99 @@
     select,input,textarea,button{font-family:'Inter',sans-serif}
     ::-webkit-scrollbar{width:5px}
     ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px}
+    /* ─── UNIFIED DASHBOARD ─── */
+    .ud-wrap{background:#f5f5f7;height:100dvh;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;font-family:'Inter',sans-serif}
+    .ud-topbar{background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.06);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50}
+    .ud-topbar-title{font-size:16px;font-weight:700;color:#0f172a;letter-spacing:-0.4px}
+    .ud-topbar-sub{font-size:11px;color:#94a3b8;margin-top:1px}
+    .ud-topbar-right{display:flex;align-items:center;gap:10px}
+    .ud-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#f97316,#fbbf24);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff}
+    .ud-logout{background:transparent;border:1px solid #e2e8f0;border-radius:7px;padding:5px 12px;font-size:11px;cursor:pointer;color:#64748b;font-family:'Inter',sans-serif}
+    .ud-notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;background:#ef4444;border-radius:50%;border:1.5px solid #f1f5f9}
+    .ud-content{flex:1;padding:24px 28px;overflow-x:hidden}
+    .ud-banner{background:linear-gradient(135deg,#0d1b2a 0%,#1e3a5f 100%);border-radius:18px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .ud-bnt{color:#f8fafc;font-weight:700;font-size:13px}
+    .ud-bns{color:#475569;font-size:10px;margin-top:2px}
+    .ud-btn-p{background:#f97316;color:#fff;border:none;border-radius:9px;padding:9px 18px;font-weight:600;cursor:pointer;font-size:12px;font-family:'Inter',sans-serif;white-space:nowrap;transition:background 0.15s}
+    .ud-btn-p:hover{background:#ea6d0a}
+    .ud-btn-r{background:transparent;color:#f97316;border:1.5px solid rgba(249,115,22,0.5);border-radius:9px;padding:9px 18px;font-weight:600;cursor:pointer;font-size:12px;font-family:'Inter',sans-serif;white-space:nowrap;transition:all 0.15s}
+    .ud-btn-r:hover{background:#f97316;color:#fff}
+    .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;max-width:1200px;width:100%}
+    .card{background:#fff;border-radius:18px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 4px 16px rgba(0,0,0,0.04)}
+    .c3{grid-column:span 3}.c4{grid-column:span 4}.c6{grid-column:span 6}.c12{grid-column:span 12}
+    .kpi-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+    .kpi-val{font-size:32px;font-weight:900;color:#0f172a;line-height:1;letter-spacing:-1.5px}
+    .kpi-lbl{font-size:11px;color:#94a3b8;margin-top:4px;font-weight:500}
+    .kpi-bar{height:2px;background:#f1f5f9;border-radius:2px;margin-top:14px}
+    .kpi-fill{height:100%;border-radius:2px;transition:width 0.6s}
+    .kpi-link{float:right;font-size:10px;font-weight:600;color:#d1d5db;cursor:pointer}
+    .go{background:linear-gradient(135deg,#f97316,#fbbf24);box-shadow:0 4px 20px rgba(249,115,22,0.22)}
+    .gn{background:linear-gradient(135deg,#0891b2,#0d1b2a);box-shadow:0 4px 20px rgba(13,27,42,0.18)}
+    .gv{font-size:40px;font-weight:900;color:#fff;line-height:1;letter-spacing:-2px}
+    .gl{font-size:11px;font-weight:600;color:rgba(255,255,255,0.72);margin-bottom:10px}
+    .gs{font-size:10px;color:rgba(255,255,255,0.55);margin-top:5px}
+    .gi{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;float:right}
+    .wt{font-size:12px;font-weight:700;color:#0f172a;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+    .wt-sub{font-size:10px;color:#94a3b8;font-weight:400}
+    .br{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+    .bd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .bn{font-size:11px;font-weight:500;color:#1e293b;flex:1}
+    .bb{height:4px;background:#f1f5f9;border-radius:3px;width:80px;flex-shrink:0}
+    .bf{height:100%;border-radius:3px}
+    .bc{font-size:11px;font-weight:700;color:#64748b;width:16px;text-align:right}
+    .dw{display:flex;align-items:center;gap:16px}
+    .dl{flex:1;display:flex;flex-direction:column;gap:7px}
+    .di{display:flex;align-items:center;gap:7px;font-size:11px}
+    .dd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .ui{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f8fafc}
+    .ui:last-child{border:none;padding-bottom:0}
+    .ub{width:3px;flex-shrink:0;align-self:stretch;background:#ef4444;border-radius:2px}
+    .ut{font-size:12px;font-weight:600;color:#1e293b}
+    .us{font-size:10px;color:#94a3b8;margin-top:1px}
+    .ai{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f8fafc}
+    .ai:last-child{border:none;padding-bottom:0}
+    .aico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .at{font-size:12px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .as{font-size:10px;color:#94a3b8;margin-top:1px}
+    .udbadge{display:inline-flex;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700}
+    .ps{text-align:center;flex:1;border-right:1px solid #f1f5f9}
+    .ps:last-child{border:none}
+    .psv{font-size:18px;font-weight:800;color:#0f172a}
+    .psl{font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;margin-top:1px}
+    .cl{display:flex;gap:14px;margin-bottom:10px}
+    .cld{display:flex;align-items:center;gap:5px;font-size:10px;color:#64748b}
+    .cldd{width:7px;height:7px;border-radius:50%}
+    #dash-tip{position:fixed;background:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,0.16),0 2px 8px rgba(0,0,0,0.06);padding:14px 16px;width:240px;z-index:99999;border:1px solid rgba(0,0,0,0.06);display:none;pointer-events:none}
+    .tip-title{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px}
+    .tip-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f8fafc;font-size:11px}
+    .tip-row:last-child{border:none}
+    .tip-l{color:#1e293b;font-weight:500}
+    .tip-r{font-weight:700;color:#0f172a}
+    @media(max-width:768px){
+      .ud-topbar{padding:0 16px;height:52px}
+      .ud-content{padding:12px 12px 80px}
+      .ud-topbar-title{font-size:15px}
+      .bento{grid-template-columns:1fr 1fr;gap:10px}
+      .c3{grid-column:span 1}
+      .c4,.c6,.c12{grid-column:span 2}
+      .card{overflow:visible;min-width:0}
+      #act-grid{grid-template-columns:1fr!important;gap:0!important}
+      .act-hide-mobile{display:none!important}
+      .kpi-val{font-size:26px}
+      .go,.gn{min-height:100px!important}
+      .gv{font-size:32px}
+      .psv{font-size:16px}
+      .ud-banner{flex-direction:column;align-items:flex-start;gap:10px}
+      .ud-btn-p,.ud-btn-r{width:100%;text-align:center}
+    }
+    @media(max-width:900px) and (orientation:landscape){
+      .ud-content{padding:12px 16px 24px}
+      .bento{grid-template-columns:repeat(12,1fr);gap:10px;width:100%}
+      .c3{grid-column:span 3}.c4{grid-column:span 4}.c6{grid-column:span 6}.c12{grid-column:span 12}
+      .card{overflow:visible;min-width:0}
+      #act-grid{grid-template-columns:1fr 1fr!important}
+      .act-hide-mobile{display:flex!important}
+    }
   </style>
 </head>
 <body>
@@ -375,6 +468,7 @@ function App() {
     setUser(null);
     try { localStorage.removeItem('vds_session'); } catch {}
   };
+  const mob = useMobile();
   const [reports,      setReportsLocal]      = useState([]);
   const [vendors,      setVendorsLocal]      = useState([]);
   const [residents,    setResidentsLocal]    = useState([]);
@@ -468,7 +562,7 @@ function App() {
   };
 
   if (!user) return <LoginScreen onLogin={handleLogin} residents={residents} />;
-  if (user.role === "junta") return <JuntaDashboard user={user} reports={reports} residents={residents} comprobantes={comprobantes} votes={votes} onLogout={handleLogout} />;
+  if (user.role === "junta") return <UnifiedDashboard user={user} role="junta" reports={reports} residents={residents} comprobantes={comprobantes} votes={votes} onLogout={handleLogout} mob={mob} fullPage={true} />;
   const handleArchiveReport = (id) => {
     setReportsLocal(p => p.map(r => (r._docId || r.id) === id ? { ...r, archivado: true } : r));
     const rep2 = reports.find(r => (r._docId || r.id) === id);
@@ -486,7 +580,374 @@ function App() {
 }
 
 /* ─── JUNTA DASHBOARD ─── */
-function JuntaDashboard({ user, reports, residents, comprobantes, votes, onLogout }) {
+/* ─── UNIFIED DASHBOARD ─── */
+function UnifiedDashboard({ user, role, reports, residents, comprobantes, votes, vendors, setView, setFS, mob, printSummary, onLogout, fullPage }) {
+  const tipRef  = useRef(null);
+  const tipsRef = useRef({});
+
+  // ── Datos reales ──
+  const activeReps = reports.filter(r => !r.archivado);
+  const total      = activeReps.length;
+  const pendiente  = activeReps.filter(r => r.status === 'pendiente').length;
+  const enProceso  = activeReps.filter(r => r.status === 'en_proceso').length;
+  const resueltos  = reports.filter(r => r.status === 'listo').length;
+  const urgentes   = activeReps.filter(r => r.priority === 'alta').length;
+  const resolRate  = total > 0 ? Math.round(resueltos / total * 100) : 0;
+
+  const totalApts = residents.length || 46;
+  const mesToday  = new Date().toISOString().slice(0,7);
+  const pagados   = [...new Set(comprobantes.filter(c => (c.mes||'').startsWith(mesToday) && c.estado === 'verificado').map(c => c.apt))].length;
+  const payRate   = Math.round(pagados / totalApts * 100);
+
+  const CAT_COLORS = { plomeria:'#3b82f6', electrico:'#f59e0b', danos:'#ef4444', quejas:'#8b5cf6', limpieza:'#10b981', seguridad:'#dc2626', ascensor:'#06b6d4', objetos:'#84cc16', general:'#94a3b8' };
+  const CAT_NAMES  = { plomeria:'Plomería', electrico:'Eléctrico', danos:'Daños', quejas:'Quejas', limpieza:'Limpieza', seguridad:'Seguridad', ascensor:'Ascensor', objetos:'Objetos', general:'General' };
+  const catCounts  = {};
+  activeReps.forEach(r => { catCounts[r.category] = (catCounts[r.category]||0) + 1; });
+  const topCats = Object.entries(catCounts).sort((a,b) => b[1]-a[1]).slice(0,6);
+  const maxCat  = topCats[0]?.[1] || 1;
+
+  const areaCounts = {};
+  activeReps.filter(r => r.ubicacion).forEach(r => { areaCounts[r.ubicacion] = (areaCounts[r.ubicacion]||0) + 1; });
+  const topAreas  = Object.entries(areaCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const AREA_COLS = ['#0891b2','#f97316','#6366f1','#10b981','#e2e8f0'];
+  const totalAreaN = topAreas.reduce((s,[,c]) => s+c, 0);
+
+  const urgentList = activeReps.filter(r => r.priority==='alta' && r.status!=='listo').slice(0,3);
+  const recentReps = [...activeReps].sort((a,b) => (b.date||'').localeCompare(a.date||'')).slice(0,4);
+
+  // Gráfica — últimas 6 semanas
+  const now    = new Date();
+  const weeks  = Array.from({length:6}, (_,i) => { const d=new Date(now); d.setDate(d.getDate()-(5-i)*7); return d.toISOString().slice(0,10); });
+  const wLabels= weeks.map(w => { const d=new Date(w); return `${d.getDate()}/${d.getMonth()+1}`; });
+  const cSem   = weeks.map((w,i) => reports.filter(r => r.date && r.date>=w && r.date<(weeks[i+1]||'9999')).length);
+  const rSem   = weeks.map((w,i) => reports.filter(r => r.date && r.date>=w && r.date<(weeks[i+1]||'9999') && r.status==='listo').length);
+  const maxVal = Math.max(...cSem, ...rSem, 1);
+  const PW=280, PH=75, pad=10;
+  const xStep  = (PW-pad*2)/5;
+  const yScale = v => PH-pad-(v/maxVal)*(PH-pad*2-5);
+  const smooth = arr => {
+    const p = arr.map((v,i) => [pad+i*xStep, yScale(v)]);
+    let d = `M ${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
+    for (let i=1;i<p.length;i++) {
+      const cp1x=p[i-1][0]+xStep*0.4, cp2x=p[i][0]-xStep*0.4;
+      d += ` C ${cp1x.toFixed(1)} ${p[i-1][1].toFixed(1)}, ${cp2x.toFixed(1)} ${p[i][1].toFixed(1)}, ${p[i][0].toFixed(1)} ${p[i][1].toFixed(1)}`;
+    }
+    return d;
+  };
+
+  // Perfil
+  const member   = JUNTA_MEMBERS.find(m => m.name===user.name) || { name:user.name, cargo:'Miembro', apto:'-', initials:(user.name||'JD').slice(0,2).toUpperCase() };
+  const initials = role==='admin' ? 'AD' : member.initials;
+  const dispName = role==='admin' ? 'Administradora' : member.name;
+  const dispRole = role==='admin' ? 'Admin General' : `${member.cargo} · ${member.apto}`;
+  const myReps   = role==='junta' ? activeReps.filter(r => r.apt===member.apto) : [];
+  const myRes    = myReps.filter(r=>r.status==='listo').length;
+  const myPend   = myReps.filter(r=>r.status==='pendiente').length;
+  const myAlDia  = role==='junta' ? comprobantes.some(c=>(c.mes||'').startsWith(mesToday)&&c.apt===member.apto&&c.estado==='verificado') : false;
+
+  // Fecha
+  const today = (() => {
+    const d=new Date(new Date().getTime()-5*60*60*1000);
+    const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return `${dias[d.getUTCDay()]}, ${d.getUTCDate()} de ${meses[d.getUTCMonth()]}`;
+  })();
+
+  // Helpers
+  const S_LABEL = {pendiente:'Por Asignar', en_proceso:'En Proceso', listo:'Resuelto', cancelado:'Cancelado'};
+  const S_STYLE = {pendiente:{background:'#fef9ee',color:'#d97706'}, en_proceso:{background:'#eff6ff',color:'#2563eb'}, listo:{background:'#f0fdf4',color:'#059669'}, cancelado:{background:'#fff1f1',color:'#dc2626'}};
+  const ACT_COL = {pendiente:'#f59e0b', en_proceso:'#3b82f6', listo:'#10b981', cancelado:'#dc2626'};
+
+  // Donut SVG dinámico
+  const donutSvg = (() => {
+    const R=32,CX=45,CY=45,SW=14,circ=2*Math.PI*R;
+    if (!topAreas.length) return `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="#f1f5f9" stroke-width="${SW}"/><text x="${CX}" y="${CY+4}" text-anchor="middle" font-size="11" font-weight="800" fill="#0f172a" font-family="Inter">0</text>`;
+    let offset=0, paths=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="#f1f5f9" stroke-width="${SW}"/>`;
+    const t=topAreas.reduce((s,[,c])=>s+c,0)||1;
+    topAreas.forEach(([,count],i)=>{
+      const dash=(count/t)*circ;
+      paths+=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${AREA_COLS[i]||'#e2e8f0'}" stroke-width="${SW}" stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-dashoffset="${(-offset).toFixed(1)}" transform="rotate(-90 ${CX} ${CY})"/>`;
+      offset+=dash;
+    });
+    return paths+`<text x="${CX}" y="${CY+4}" text-anchor="middle" font-size="11" font-weight="800" fill="#0f172a" font-family="Inter">${totalAreaN}</text>`;
+  })();
+
+  // TIPS con datos reales — se actualiza en cada render vía ref
+  tipsRef.current = {
+    total:     `<div class="tip-title">Últimos reportes activos</div>${recentReps.slice(0,5).map(r=>`<div class="tip-row"><span class="tip-l">${(r.title||'').slice(0,24)}</span><span class="tip-r" style="color:${r.status==='pendiente'?'#d97706':r.status==='en_proceso'?'#2563eb':'#059669'}">${S_LABEL[r.status]||r.status}</span></div>`).join('')||'<div class="tip-row"><span class="tip-l">Sin reportes</span></div>'}`,
+    asignar:   `<div class="tip-title">Por Asignar</div>${activeReps.filter(r=>r.status==='pendiente').slice(0,5).map(r=>`<div class="tip-row"><span class="tip-l">${(r.title||'').slice(0,24)}</span><span class="tip-r" style="color:${r.priority==='alta'?'#dc2626':r.priority==='media'?'#d97706':'#059669'}">${r.priority==='alta'?'🔴 Alta':r.priority==='media'?'🟡 Media':'🟢 Baja'}</span></div>`).join('')||'<div class="tip-row"><span class="tip-l">Sin pendientes</span></div>'}`,
+    proceso:   `<div class="tip-title">En Proceso</div>${activeReps.filter(r=>r.status==='en_proceso').slice(0,5).map(r=>`<div class="tip-row"><span class="tip-l">${(r.title||'').slice(0,24)}</span><span class="tip-r">${r.vendor||'Sin proveedor'}</span></div>`).join('')||'<div class="tip-row"><span class="tip-l">Sin reportes en proceso</span></div>'}`,
+    resueltos: `<div class="tip-title">Últimos resueltos</div>${reports.filter(r=>r.status==='listo').sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,5).map(r=>`<div class="tip-row"><span class="tip-l">${(r.title||'').slice(0,24)}</span><span class="tip-r" style="color:#059669">✓ ${r.date||''}</span></div>`).join('')||'<div class="tip-row"><span class="tip-l">Sin resueltos aún</span></div>'}`,
+    resolucion:`<div class="tip-title">Resolución por categoría</div>${topCats.slice(0,4).map(([cat,count])=>{const res=reports.filter(r=>r.category===cat&&r.status==='listo').length;return`<div class="tip-row"><span class="tip-l">${CAT_NAMES[cat]||cat}</span><span class="tip-r">${res}/${count}</span></div>`;}).join('')}`,
+    pagos:     `<div class="tip-title">Pagos — ${mesToday}</div><div class="tip-row"><span class="tip-l">Al día</span><span class="tip-r" style="color:#059669">${pagados} aptos</span></div><div class="tip-row"><span class="tip-l">Pendientes</span><span class="tip-r" style="color:#dc2626">${totalApts-pagados} aptos</span></div><div class="tip-row"><span class="tip-l">Cobertura</span><span class="tip-r">${payRate}%</span></div>`,
+    areas:     `<div class="tip-title">Top áreas con reportes</div>${topAreas.map(([area,count])=>`<div class="tip-row"><span class="tip-l">${area.slice(0,22)}</span><span class="tip-r">${count}</span></div>`).join('')||'<div class="tip-row"><span class="tip-l">Sin datos</span></div>'}`,
+    perfil:    role==='junta'
+      ? `<div class="tip-title">Mi estado — Junta</div><div class="tip-row"><span class="tip-l">Cargo</span><span class="tip-r">${member.cargo}</span></div><div class="tip-row"><span class="tip-l">Tickets enviados</span><span class="tip-r">${myReps.length}</span></div><div class="tip-row"><span class="tip-l">Resueltos</span><span class="tip-r" style="color:#059669">${myRes}</span></div><div class="tip-row"><span class="tip-l">Pendientes</span><span class="tip-r" style="color:#d97706">${myPend}</span></div><div class="tip-row"><span class="tip-l">Cuota del mes</span><span class="tip-r" style="color:${myAlDia?'#059669':'#dc2626'}">${myAlDia?'✓ Al día':'⚠️ Pendiente'}</span></div>`
+      : ''
+  };
+
+  // Toast
+  function showToast(msg,color){
+    const t=document.createElement('div');
+    t.textContent=msg;
+    t.style.cssText=`position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:${color||'#0d1b2a'};color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;font-family:Inter,sans-serif;z-index:9999;opacity:0;transition:opacity 0.2s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.2)`;
+    document.body.appendChild(t);
+    requestAnimationFrame(()=>{ t.style.opacity='1'; });
+    setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); },2200);
+  }
+
+  // Tooltips — event delegation, solo se monta una vez
+  useEffect(() => {
+    const tip=tipRef.current;
+    if(!tip) return;
+    let hideTimer=null;
+    const TW=240;
+    function showTip(el,key){
+      const tips=tipsRef.current;
+      if(!tips[key]) return;
+      if(key==='perfil'&&role!=='junta') return;
+      tip.innerHTML=tips[key];
+      tip.style.display='block'; tip.style.opacity='0'; tip.style.transition='none';
+      requestAnimationFrame(()=>{
+        const rect=el.getBoundingClientRect(),th=tip.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;
+        let left=rect.left+rect.width/2-TW/2;
+        if(left<8) left=8; if(left+TW>vw-8) left=vw-TW-8;
+        let top=(rect.top-th-12>8)?(rect.top-th-12):(rect.bottom+12);
+        if(top+th>vh-8) top=vh-th-8;
+        tip.style.left=left+'px'; tip.style.top=top+'px'; tip.style.width=TW+'px';
+        tip.style.transition='opacity 0.15s ease'; tip.style.opacity='1';
+      });
+    }
+    function hideTip(){ hideTimer=setTimeout(()=>{ tip.style.opacity='0'; setTimeout(()=>{ tip.style.display='none'; },150); },80); }
+    const cont=document.getElementById('unified-dash');
+    if(!cont) return;
+    const onOver =e=>{ const el=e.target.closest('[data-tip]'); if(el&&cont.contains(el)){ clearTimeout(hideTimer); showTip(el,el.dataset.tip); } };
+    const onOut  =e=>{ if(e.target.closest('[data-tip]')) hideTip(); };
+    const onTouch=e=>{ const el=e.target.closest('[data-tip]'); if(el&&cont.contains(el)){ if(tip.style.display==='block') hideTip(); else{ e.preventDefault(); clearTimeout(hideTimer); showTip(el,el.dataset.tip); } } else if(tip.style.display==='block'&&!tip.contains(e.target)) hideTip(); };
+    cont.addEventListener('mouseover',onOver);
+    cont.addEventListener('mouseout',onOut);
+    document.addEventListener('touchend',onTouch);
+    tip.addEventListener('mouseenter',()=>clearTimeout(hideTimer));
+    tip.addEventListener('mouseleave',hideTip);
+    return ()=>{ cont.removeEventListener('mouseover',onOver); cont.removeEventListener('mouseout',onOut); document.removeEventListener('touchend',onTouch); };
+  }, []);
+
+  // Handlers
+  const handleKpi = status => { if(role==='admin'&&setFS&&setView){ setFS(status); setView('reports'); } };
+  const handleAction = () => {
+    if(role==='admin'){ printSummary&&printSummary(); return; }
+    const h=new Date().getHours();
+    if(h>=7&&h<19) showToast('✅ Recordatorio enviado al Administrador','#059669');
+    else showToast('🕐 Fuera de horario. Se enviará a las 7:01am','#64748b');
+  };
+
+  // ── JSX ──
+  const bentoContent = (
+    <div className="bento">
+
+      {/* ROW 1: KPIs */}
+      <div className="card c3" data-tip="total" style={{cursor:'pointer'}} onClick={()=>handleKpi('all')}>
+        <span className="kpi-link">Ver →</span>
+        <div className="kpi-icon" style={{background:'#eef2ff'}}><svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" width="16" height="16"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div className="kpi-val">{total}</div><div className="kpi-lbl">Total Reportes</div>
+        <div className="kpi-bar"><div className="kpi-fill" style={{width:'100%',background:'#6366f1'}}/></div>
+      </div>
+
+      <div className="card c3" data-tip="asignar" style={{cursor:'pointer'}} onClick={()=>handleKpi('pendiente')}>
+        <span className="kpi-link">Ver →</span>
+        <div className="kpi-icon" style={{background:'#fefce8'}}><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div className="kpi-val">{pendiente}</div><div className="kpi-lbl">Por Asignar</div>
+        <div className="kpi-bar"><div className="kpi-fill" style={{width:`${total>0?pendiente/total*100:0}%`,background:'#f59e0b'}}/></div>
+      </div>
+
+      <div className="card c3" data-tip="proceso" style={{cursor:'pointer'}} onClick={()=>handleKpi('en_proceso')}>
+        <span className="kpi-link">Ver →</span>
+        <div className="kpi-icon" style={{background:'#eff6ff'}}><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" width="16" height="16"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></div>
+        <div className="kpi-val">{enProceso}</div><div className="kpi-lbl">En Proceso</div>
+        <div className="kpi-bar"><div className="kpi-fill" style={{width:`${total>0?enProceso/total*100:0}%`,background:'#3b82f6'}}/></div>
+      </div>
+
+      <div className="card c3" data-tip="resueltos" style={{cursor:'pointer'}} onClick={()=>handleKpi('listo')}>
+        <span className="kpi-link">Ver →</span>
+        <div className="kpi-icon" style={{background:'#ecfdf5'}}><svg viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div className="kpi-val">{resueltos}</div><div className="kpi-lbl">Resueltos</div>
+        <div className="kpi-bar"><div className="kpi-fill" style={{width:`${total>0?resueltos/total*100:0}%`,background:'#10b981'}}/></div>
+      </div>
+
+      {/* ROW 2: Gradientes + Perfil */}
+      <div className="card c4 go" data-tip="resolucion" style={{cursor:'pointer',minHeight:120}}>
+        <div className="gi"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div className="gl">Tasa de Resolución</div>
+        <div className="gv">{resolRate}%</div>
+        <div className="gs">{resueltos} de {total} reportes resueltos</div>
+      </div>
+
+      <div className="card c4 gn" data-tip="pagos" style={{cursor:'pointer',minHeight:120}}>
+        <div className="gi"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+        <div className="gl">Pagos este Mes</div>
+        <div className="gv">{payRate}%</div>
+        <div className="gs">{pagados} de {totalApts} apartamentos al día</div>
+      </div>
+
+      <div className="card c4" data-tip="perfil" style={{minHeight:120}}>
+        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:14}}>
+          <div className="ud-avatar" style={{width:42,height:42,fontSize:15,fontWeight:900,boxShadow:'0 3px 10px rgba(249,115,22,0.25)'}}>{initials}</div>
+          <div>
+            <div style={{fontSize:13,fontWeight:700,color:'#0f172a'}}>{dispName}</div>
+            <div style={{fontSize:10,color:'#64748b',background:'#f1f5f9',borderRadius:20,padding:'2px 9px',marginTop:3,display:'inline-block'}}>{dispRole}</div>
+          </div>
+        </div>
+        <div style={{display:'flex',borderTop:'1px solid #f1f5f9',paddingTop:12}}>
+          <div className="ps"><div className="psv">{total}</div><div className="psl">Tickets</div></div>
+          <div className="ps"><div className="psv" style={{color:'#dc2626'}}>{urgentes}</div><div className="psl">Urgentes</div></div>
+          <div className="ps" style={{border:'none'}}><div className="psv" style={{color:'#059669'}}>{resueltos}</div><div className="psl">Resueltos</div></div>
+        </div>
+      </div>
+
+      {/* ROW 3: Categorías + Áreas */}
+      <div className="card c6">
+        <div className="wt">Por Categoría <span className="wt-sub">{total} reportes</span></div>
+        {topCats.length===0 && <div style={{color:'#94a3b8',fontSize:12,textAlign:'center',padding:'16px 0'}}>Sin datos</div>}
+        {topCats.map(([cat,count]) => (
+          <div key={cat} className="br">
+            <div className="bd" style={{background:CAT_COLORS[cat]||'#94a3b8'}}/>
+            <span className="bn">{CAT_NAMES[cat]||cat}</span>
+            <div className="bb"><div className="bf" style={{width:`${count/maxCat*100}%`,background:CAT_COLORS[cat]||'#94a3b8'}}/></div>
+            <span className="bc">{count}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="card c6" data-tip="areas">
+        <div className="wt">Por Área <span className="wt-sub">top áreas</span></div>
+        <div className="dw">
+          <svg width="90" height="90" viewBox="0 0 90 90" style={{flexShrink:0}} dangerouslySetInnerHTML={{__html:donutSvg}}/>
+          <div className="dl">
+            {topAreas.length===0 && <div style={{color:'#94a3b8',fontSize:11}}>Sin datos</div>}
+            {topAreas.map(([area,count],i) => (
+              <div key={area} className="di">
+                <div className="dd" style={{background:AREA_COLS[i]||'#e2e8f0'}}/>
+                <span style={{flex:1,color:'#475569',fontSize:11}}>{area.length>18?area.slice(0,18)+'…':area}</span>
+                <span style={{fontWeight:700,fontSize:11}}>{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ROW 4: Actividad Reciente */}
+      <div className="card c12">
+        <div className="wt">Actividad Reciente <span className="wt-sub">todos los reportes</span></div>
+        <div id="act-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 28px'}}>
+          {recentReps.length===0 && <div style={{color:'#94a3b8',fontSize:12}}>Sin reportes recientes</div>}
+          {recentReps.map((r,i) => (
+            <div key={r._docId||i} className={'ai'+(i>=2?' act-hide-mobile':'')} style={i===recentReps.length-1?{border:'none'}:{}}>
+              <div className="aico" style={{background:(ACT_COL[r.status]||'#94a3b8')+'20'}}>
+                <svg viewBox="0 0 24 24" fill="none" stroke={ACT_COL[r.status]||'#94a3b8'} strokeWidth="2" width="14" height="14"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div className="at">{r.title||'Sin título'}</div>
+                <div className="as">{[r.apt,r.date].filter(Boolean).join(' · ')}</div>
+              </div>
+              <span className="udbadge" style={{...(S_STYLE[r.status]||{background:'#f1f5f9',color:'#64748b'}),flexShrink:0,marginLeft:8}}>{S_LABEL[r.status]||r.status}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ROW 5: Urgencias + Gráfica */}
+      <div className="card c6">
+        <div className="wt">
+          Urgencias Activas{' '}
+          {urgentList.length>0 && <span style={{background:'#ef4444',color:'#fff',borderRadius:20,padding:'2px 8px',fontSize:9,fontWeight:700}}>{urgentList.length}</span>}
+        </div>
+        {urgentList.length===0
+          ? <div style={{color:'#94a3b8',fontSize:12,textAlign:'center',padding:'20px 0'}}>✓ Sin urgencias activas</div>
+          : urgentList.map((r,i) => (
+            <div key={r._docId||i} className="ui">
+              <div className="ub"/>
+              <div>
+                <div className="ut">{r.title}</div>
+                <div className="us">{[CAT_NAMES[r.category]||r.category, r.apt||r.ubicacion, r.date].filter(Boolean).join(' · ')}</div>
+                <span className="udbadge" style={S_STYLE[r.status]||{}}>{S_LABEL[r.status]||r.status}</span>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+
+      <div className="card c6">
+        <div className="wt">Actividad <span className="wt-sub">últimas 6 semanas</span></div>
+        <div className="cl">
+          <div className="cld"><div className="cldd" style={{background:'#f97316'}}/><span>Creados</span></div>
+          <div className="cld"><div className="cldd" style={{background:'#0891b2'}}/><span>Resueltos</span></div>
+        </div>
+        <svg width="100%" viewBox="0 0 280 75" style={{overflow:'visible'}}>
+          <defs>
+            <linearGradient id="udg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f97316" stopOpacity="0.12"/><stop offset="100%" stopColor="#f97316" stopOpacity="0"/></linearGradient>
+            <linearGradient id="udg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#0891b2" stopOpacity="0.1"/><stop offset="100%" stopColor="#0891b2" stopOpacity="0"/></linearGradient>
+          </defs>
+          {[10,30,50].map(y=><line key={y} x1="10" y1={y} x2="270" y2={y} stroke="#f8fafc" strokeWidth="1"/>)}
+          <path d={`${smooth(cSem)} L${(pad+5*xStep).toFixed(1)},${(PH-pad).toFixed(1)} L${pad},${(PH-pad).toFixed(1)} Z`} fill="url(#udg1)"/>
+          <path d={`${smooth(rSem)} L${(pad+5*xStep).toFixed(1)},${(PH-pad).toFixed(1)} L${pad},${(PH-pad).toFixed(1)} Z`} fill="url(#udg2)"/>
+          <path d={smooth(cSem)} fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round"/>
+          <path d={smooth(rSem)} fill="none" stroke="#0891b2" strokeWidth="2" strokeLinecap="round"/>
+          {cSem.map((v,i)=><circle key={i} cx={(pad+i*xStep).toFixed(1)} cy={yScale(v).toFixed(1)} r="3" fill="#fff" stroke="#f97316" strokeWidth="1.5"/>)}
+          {wLabels.map((l,i)=><text key={i} x={(pad+i*xStep).toFixed(1)} y="73" textAnchor="middle" fontSize="8" fill="#c4cdd8" fontFamily="Inter">{l}</text>)}
+        </svg>
+      </div>
+
+      {/* ROW 6: Banner */}
+      <div className="c12">
+        <div className="ud-banner">
+          <div>
+            <div className="ud-bnt">{role==='admin'?'📄 Informe para Junta Directiva':'🔔 Recordatorio al Administrador'}</div>
+            <div className="ud-bns">{role==='admin'?'Genera el resumen completo listo para imprimir o proyectar':'Notifica al admin sobre el reporte más urgente (solo 7am–7pm)'}</div>
+          </div>
+          <button className={role==='admin'?'ud-btn-p':'ud-btn-r'} onClick={handleAction}>
+            {role==='admin'?'🖨️ Generar Informe PDF':'📨 Enviar Recordatorio'}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  );
+
+  const tipEl = <div ref={tipRef} id="dash-tip"/>;
+
+  if (!fullPage) {
+    return (
+      <div id="unified-dash" style={{paddingBottom:24}}>
+        {bentoContent}
+        {tipEl}
+      </div>
+    );
+  }
+
+  return (
+    <div id="unified-dash" className="ud-wrap">
+      <div className="ud-topbar">
+        <div>
+          <div className="ud-topbar-title">Dashboard</div>
+          <div className="ud-topbar-sub">Junta Directiva · {member.cargo}</div>
+        </div>
+        <div className="ud-topbar-right">
+          {!mob && <span style={{fontSize:11,color:'#94a3b8'}}>{today}</span>}
+          <div style={{width:32,height:32,borderRadius:8,background:'#f1f5f9',display:'flex',alignItems:'center',justifyContent:'center',position:'relative'}}>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#475569" strokeWidth="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            {urgentes>0 && <div className="ud-notif-dot"/>}
+          </div>
+          <div className="ud-avatar">{initials}</div>
+          <button className="ud-logout" onClick={onLogout}>Salir</button>
+        </div>
+      </div>
+      <div className="ud-content">{bentoContent}</div>
+      {tipEl}
+    </div>
+  );
+}
+
+function _JuntaDashboard_OLD({ user, reports, residents, comprobantes, votes, onLogout }) {
   const mob = useMobile();
   const member = JUNTA_MEMBERS.find(m => m.name === user.name) || { name: user.name, cargo: "Miembro", apto: "-", initials: user.name.slice(0,2).toUpperCase() };
 
@@ -1210,7 +1671,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
 
         {/* SCROLL AREA */}
         <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: mob ? "16px 14px 32px" : "24px 28px", width: "100%" }}>
-          {view === "dashboard" && <AdminDashboard reports={reports} vendors={vendors} setView={(v) => { setViewPersisted(v); setSR(null); }} setFS={setFS} mob={mob} printSummary={printSummary} />}
+          {view === "dashboard" && <UnifiedDashboard user={user} role="admin" reports={reports} vendors={vendors} residents={residents} comprobantes={comprobantes} setView={(v) => { setViewPersisted(v); setSR(null); }} setFS={setFS} mob={mob} printSummary={printSummary} onLogout={onLogout} fullPage={false} />}
           {view === "reports" && (
             selectedReport
               ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { onArchiveReport(id); setSR(null); }} vendors={vendors} mob={mob} setConfirmModal={setConfirmModal} />
@@ -1250,7 +1711,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
 }
 
 /* ─── ADMIN DASHBOARD ─── */
-function AdminDashboard({ reports, vendors, setView, setFS, mob, printSummary }) {
+function _AdminDashboard_OLD({ reports, vendors, setView, setFS, mob, printSummary }) {
   const stats = [
     { label: "Total Reportes",  value: reports.length,                                         icon: "📋", color: "#6366f1", bg: "#eef2ff", status: null },
     { label: "Por Asignar",     value: reports.filter(r => r.status === "pendiente").length,   icon: "⏳", color: "#f59e0b", bg: "#fefce8", status: "pendiente" },
