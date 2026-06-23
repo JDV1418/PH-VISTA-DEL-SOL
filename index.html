@@ -1411,7 +1411,7 @@ function LoginScreen({ onLogin, residents }) {
 
   const handleAdminLogin = () => {
     if (adminUser.trim() !== "AdminVDS") { setAdminError("Usuario incorrecto"); return; }
-    if (adminPin !== "8888") { setAdminError("PIN incorrecto"); return; }
+    if (adminPin !== "0000") { setAdminError("PIN incorrecto"); return; }
     onLogin({ role: "admin", name: "Administradora" });
   };
 
