@@ -1741,7 +1741,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
               <>
                 <button onClick={exportExcel} style={btnSec(mob)}>📥 Excel</button>
                 <button onClick={printSummary} style={btnSec(mob)}>🖨️ PDF</button>
-                <button onClick={() => { if (nextTicketNum(reports) > 1000) { alert("⚠️ Se alcanzó el límite de 1000 tickets."); return; } setSNR(true); }} style={btnPri(mob)}>+ Reporte</button>
+                <button onClick={() => { if (nextTicketNum(reports) > 1000) { alert("⚠️ Se alcanzó el límite de 1000 tickets."); return; } setSNR(true); }} style={btnPri(mob)}>{mob ? "+" : "+ Reporte"}</button>
               </>
             )}
             {view === "vendors"    && <button onClick={() => setSNV(true)} style={btnPri(mob)}>+ Proveedor</button>}
