@@ -756,9 +756,10 @@ function UnifiedDashboard({ user, role, reports, residents, comprobantes, votes,
     if(!cont) return;
     const onOver =e=>{ const el=e.target.closest('[data-tip]'); if(el&&cont.contains(el)){ clearTimeout(hideTimer); showTip(el,el.dataset.tip); } };
     const onOut  =e=>{ if(e.target.closest('[data-tip]')) hideTip(); };
-    const onTouch=e=>{ const el=e.target.closest('[data-tip]'); if(el&&cont.contains(el)){ if(tip.style.display==='block') hideTip(); else{ e.preventDefault(); clearTimeout(hideTimer); showTip(el,el.dataset.tip); } } else if(tip.style.display==='block'&&!tip.contains(e.target)) hideTip(); };
-    cont.addEventListener('mouseover',onOver);
-    cont.addEventListener('mouseout',onOut);
+    const isMobile=()=>window.matchMedia('(pointer:coarse)').matches;
+    const onTouch=e=>{ if(isMobile()) return; const el=e.target.closest('[data-tip]'); if(el&&cont.contains(el)){ if(tip.style.display==='block') hideTip(); else{ e.preventDefault(); clearTimeout(hideTimer); showTip(el,el.dataset.tip); } } else if(tip.style.display==='block'&&!tip.contains(e.target)) hideTip(); };
+    cont.addEventListener('mouseover',e=>{ if(isMobile()) return; onOver(e); });
+    cont.addEventListener('mouseout',e=>{ if(isMobile()) return; onOut(e); });
     document.addEventListener('touchend',onTouch);
     tip.addEventListener('mouseenter',()=>clearTimeout(hideTimer));
     tip.addEventListener('mouseleave',hideTip);
