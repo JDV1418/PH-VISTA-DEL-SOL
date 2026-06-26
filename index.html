@@ -772,8 +772,11 @@ function UnifiedDashboard({ user, role, reports, residents, comprobantes, votes,
   // KPI modal
   const [kpiModal, setKpiModal] = React.useState(null); // {label, list}
   const openKpi = (status, label) => {
-    const all = reports.filter(r => !r.archivado);
-    const list = status === 'all' ? all : all.filter(r => r.status === status);
+    const list = status === 'all'
+      ? reports.filter(r => !r.archivado)
+      : status === 'listo'
+        ? reports.filter(r => r.status === 'listo')
+        : reports.filter(r => !r.archivado && r.status === status);
     setKpiModal({label, list});
   };
   const fmtFecha = ts => {
