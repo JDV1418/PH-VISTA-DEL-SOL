@@ -2036,17 +2036,16 @@ function ReportsAreaDash({ reports = [], onSelect, onRestore, mob, handleRenumer
           const activeCount = ap + ae;
           const recent  = reps.find(r => r.status === "pendiente" && !r.archivado) || reps.find(r => r.status === "en_proceso" && !r.archivado) || reps.find(r => !r.archivado);
           return (
-            <div key={c.id} className="rad-widget" onClick={() => { setSelCat(c.id); setSubView("area"); }}>
+            <div key={c.id} className="rad-widget" style={{position:"relative"}} onClick={() => { setSelCat(c.id); setSubView("area"); }}>
+              {al > 0 && (
+                <div style={{position:"absolute",top:12,right:12,background:"rgba(26,122,74,0.12)",color:"#1a7a4a",borderRadius:20,padding:"3px 9px",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>
+                  {al} resuelto{al>1?"s":""}
+                </div>
+              )}
               <div style={{ fontSize: 26, marginBottom: 10 }}>{c.icon}</div>
               <div className="rad-w-name" style={{ color: c.color }}>{c.label}</div>
               <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginBottom: 8 }}>
                 <div className="rad-w-num" style={{ color: c.color, marginBottom: 0 }}>{activeCount}</div>
-                {arch > 0 && (
-                  <div style={{ fontSize: 16, fontWeight: 700, color: "rgba(0,0,0,0.32)", lineHeight: 1, marginBottom: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-                    <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>canc.</span>
-                    <span>{arch}</span>
-                  </div>
-                )}
               </div>
               <div className="rad-w-pills">
                 {ap > 0 && <span className="rad-pill">{ap} pendiente{ap > 1 ? "s" : ""}</span>}
