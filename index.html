@@ -1746,7 +1746,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
             )}
             {view === "vendors"    && <button onClick={() => setSNV(true)} style={btnPri(mob)}>+ Proveedor</button>}
             {view === "residentes" && <button onClick={() => setSNRes(true)} style={btnPri(mob)}>+ Residente</button>}
-            {mob && <button onClick={onLogout} style={{ background: "transparent", border: "1px solid #e2e8f0", borderRadius: 8, padding: "6px 10px", fontSize: 11, cursor: "pointer", color: "#64748b" }}>Salir</button>}
+            {mob && <button onClick={onLogout} style={{ background: "transparent", border: "1px solid #e2e8f0", borderRadius: 8, width: 44, height: 38, fontSize: 12, cursor: "pointer", color: "#64748b", fontFamily: "'Inter',sans-serif", fontWeight: 500, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>Salir</button>}
           </div>
         </div>
 
