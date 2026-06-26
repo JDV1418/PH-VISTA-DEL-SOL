@@ -1742,12 +1742,12 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
                 <button onClick={exportExcel} style={btnSec(mob)} title="Exportar Excel">
                   {mob
                     ? <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><rect width="24" height="24" rx="4" fill="#1D6F42"/><path d="M7 7l3.5 5L7 17h2.5l2-3.2 2 3.2H16l-3.5-5L16 7h-2.5l-2 3.2L9.5 7H7z" fill="#fff"/></svg>
-                    : "📥 Excel"}
+                    : <><svg viewBox="0 0 24 24" width="16" height="16" fill="none" style={{marginRight:6,flexShrink:0}}><rect width="24" height="24" rx="4" fill="#1D6F42"/><path d="M7 7l3.5 5L7 17h2.5l2-3.2 2 3.2H16l-3.5-5L16 7h-2.5l-2 3.2L9.5 7H7z" fill="#fff"/></svg>Excel</>}
                 </button>
-                <button onClick={printSummary} style={btnSec(mob)} title="Exportar PDF">
+                <button onClick={printSummary} style={{...btnSec(mob), display:"flex", alignItems:"center"}} title="Exportar PDF">
                   {mob
                     ? <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><rect width="24" height="24" rx="4" fill="#E53935"/><text x="4" y="16" fontFamily="Arial" fontWeight="bold" fontSize="9" fill="#fff">PDF</text></svg>
-                    : "🖨️ PDF"}
+                    : <><svg viewBox="0 0 24 24" width="16" height="16" fill="none" style={{marginRight:6,flexShrink:0}}><rect width="24" height="24" rx="4" fill="#E53935"/><text x="4" y="16" fontFamily="Arial" fontWeight="bold" fontSize="9" fill="#fff">PDF</text></svg>PDF</> }
                 </button>
                 <button onClick={() => { if (nextTicketNum(reports) > 1000) { alert("⚠️ Se alcanzó el límite de 1000 tickets."); return; } setSNR(true); }} style={btnPri(mob)}>{mob ? "+" : "+ Reporte"}</button>
               </>
