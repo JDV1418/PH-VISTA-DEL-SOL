@@ -766,8 +766,24 @@ function UnifiedDashboard({ user, role, reports, residents, comprobantes, votes,
     return ()=>{ cont.removeEventListener('mouseover',onOver); cont.removeEventListener('mouseout',onOut); document.removeEventListener('touchend',onTouch); };
   }, []);
 
+  // KPI modal
+  const [kpiModal, setKpiModal] = React.useState(null); // {label, list}
+  const openKpi = (status, label) => {
+    const all = reports.filter(r => !r.archivado);
+    const list = status === 'all' ? all : all.filter(r => r.status === status);
+    setKpiModal({label, list});
+  };
+  const fmtFecha = ts => {
+    if(!ts) return '—';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'});
+  };
+
   // Handlers
-  const handleKpi = status => { if(role==='admin'&&setFS&&setView){ setFS(status); setView('reports'); } };
+  const handleKpi = status => {
+    const labels = {all:'Total Reportes', pendiente:'Por Asignar', en_proceso:'En Proceso', listo:'Resueltos'};
+    openKpi(status, labels[status] || status);
+  };
   const handleAction = () => {
     if(role==='admin'){ printSummary&&printSummary(); return; }
     const h=new Date().getHours();
@@ -949,11 +965,34 @@ function UnifiedDashboard({ user, role, reports, residents, comprobantes, votes,
 
   const tipEl = <div ref={tipRef} id="dash-tip"/>;
 
+  const kpiModalEl = kpiModal && (
+    <div onClick={()=>setKpiModal(null)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.45)',zIndex:900,display:'flex',alignItems:'flex-end',justifyContent:'center'}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:'#fff',borderRadius:'20px 20px 0 0',width:'100%',maxWidth:540,maxHeight:'75vh',display:'flex',flexDirection:'column',padding:'20px 20px 32px'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+          <div style={{fontSize:16,fontWeight:800,color:'#1a1a2e'}}>{kpiModal.label}</div>
+          <button onClick={()=>setKpiModal(null)} style={{background:'none',border:'none',fontSize:20,color:'#9a9ab0',cursor:'pointer',lineHeight:1}}>&#x2715;</button>
+        </div>
+        {kpiModal.list.length === 0
+          ? <div style={{textAlign:'center',color:'#9a9ab0',padding:'24px 0',fontSize:14}}>Sin reportes en esta categoría</div>
+          : <div style={{overflowY:'auto',display:'flex',flexDirection:'column',gap:8}}>
+              {kpiModal.list.map(r=>(
+                <div key={r._docId} style={{background:'#f8f8fb',borderRadius:12,padding:'12px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',gap:8}}>
+                  <div style={{fontSize:13,fontWeight:600,color:'#1a1a2e',flex:1}}>{r.title || '(Sin título)'}</div>
+                  <div style={{fontSize:11,color:'#9a9ab0',whiteSpace:'nowrap'}}>{fmtFecha(r.createdAt || r.date)}</div>
+                </div>
+              ))}
+            </div>
+        }
+      </div>
+    </div>
+  );
+
   if (!fullPage) {
     return (
       <div id="unified-dash" style={{paddingBottom:24}}>
         {bentoContent}
         {tipEl}
+        {kpiModalEl}
       </div>
     );
   }
@@ -977,6 +1016,7 @@ function UnifiedDashboard({ user, role, reports, residents, comprobantes, votes,
       </div>
       <div className="ud-content">{bentoContent}</div>
       {tipEl}
+      {kpiModalEl}
     </div>
   );
 }
