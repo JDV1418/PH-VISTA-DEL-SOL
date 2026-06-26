@@ -143,7 +143,7 @@
       .act-hide-mobile{display:flex!important}
     }
     /* ─── REPORTS AREA DASH ─── */
-    .rad-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+    .rad-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
     .rad-sum-card{background:#fff;border-radius:16px;padding:16px 18px;box-shadow:0 1px 2px rgba(0,0,0,0.03),0 3px 12px rgba(0,0,0,0.05);display:flex;align-items:center;gap:14px}
     .rad-sum-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
     .rad-sum-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:#9a9ab0;margin-bottom:3px}
@@ -169,7 +169,7 @@
     .rad-rep-card:active{transform:scale(0.98)}
     @media(max-width:700px){
       .rad-grid{grid-template-columns:repeat(2,1fr);gap:10px}
-      .rad-sum{gap:8px}
+      .rad-sum{gap:8px;grid-template-columns:repeat(2,1fr)}
       .rad-sum-card{padding:12px 13px;gap:10px}
       .rad-sum-ico{width:34px;height:34px;font-size:16px}
       .rad-sum-val{font-size:20px}
@@ -1944,8 +1944,9 @@ function ReportsAreaDash({ reports = [], onSelect, onRestore, mob, handleRenumer
   const [selCat, setSelCat] = useState(null);
 
   const total  = reports.filter(r => r.status !== "listo" && r.status !== "cancelado" && !r.archivado).length;
-  const pend   = reports.filter(r => r.status === "pendiente").length;
-  const proc   = reports.filter(r => r.status === "en_proceso").length;
+  const pend   = reports.filter(r => r.status === "pendiente" && !r.archivado).length;
+  const proc   = reports.filter(r => r.status === "en_proceso" && !r.archivado).length;
+  const resuel = reports.filter(r => r.status === "listo").length;
 
   /* ── AREA SUB-VIEW ── */
   if (subView === "area" && selCat) {
@@ -2018,27 +2019,31 @@ function ReportsAreaDash({ reports = [], onSelect, onRestore, mob, handleRenumer
           <div className="rad-sum-ico" style={{ background: "#fdd8b0" }}>🔄</div>
           <div><div className="rad-sum-lbl">En Proceso</div><div className="rad-sum-val" style={{ color: "#c06020" }}>{proc}</div></div>
         </div>
+        <div className="rad-sum-card">
+          <div className="rad-sum-ico" style={{ background: "#d1f0e0" }}>✅</div>
+          <div><div className="rad-sum-lbl">Resueltos</div><div className="rad-sum-val" style={{ color: "#1a7a4a" }}>{resuel}</div></div>
+        </div>
       </div>
 
       {/* Category grid */}
       <div className="rad-grid">
         {CATS.map(c => {
           const reps    = reports.filter(r => r.category === c.id);
-          const active  = reps.filter(r => !r.archivado);
-          const arch    = reps.filter(r => r.archivado).length;
-          const ap      = active.filter(r => r.status === "pendiente").length;
-          const ae      = active.filter(r => r.status === "en_proceso").length;
-          const al      = active.filter(r => r.status === "listo").length;
-          const recent  = active.find(r => r.status === "pendiente") || active.find(r => r.status === "en_proceso") || active[0];
+          const ap      = reps.filter(r => r.status === "pendiente" && !r.archivado).length;
+          const ae      = reps.filter(r => r.status === "en_proceso" && !r.archivado).length;
+          const al      = reps.filter(r => r.status === "listo").length;
+          const arch    = reps.filter(r => r.archivado && r.status === "cancelado").length;
+          const activeCount = ap + ae;
+          const recent  = reps.find(r => r.status === "pendiente" && !r.archivado) || reps.find(r => r.status === "en_proceso" && !r.archivado) || reps.find(r => !r.archivado);
           return (
             <div key={c.id} className="rad-widget" onClick={() => { setSelCat(c.id); setSubView("area"); }}>
               <div style={{ fontSize: 26, marginBottom: 10 }}>{c.icon}</div>
               <div className="rad-w-name" style={{ color: c.color }}>{c.label}</div>
               <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginBottom: 8 }}>
-                <div className="rad-w-num" style={{ color: c.color, marginBottom: 0 }}>{active.length}</div>
+                <div className="rad-w-num" style={{ color: c.color, marginBottom: 0 }}>{activeCount}</div>
                 {arch > 0 && (
                   <div style={{ fontSize: 16, fontWeight: 700, color: "rgba(0,0,0,0.32)", lineHeight: 1, marginBottom: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-                    <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>arch.</span>
+                    <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>canc.</span>
                     <span>{arch}</span>
                   </div>
                 )}
