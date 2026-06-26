@@ -1739,8 +1739,8 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             {view === "reports" && !selectedReport && (
               <>
-                <button onClick={exportExcel} style={btnSec(mob)}>📥 Excel</button>
-                <button onClick={printSummary} style={btnSec(mob)}>🖨️ PDF</button>
+                <button onClick={exportExcel} style={btnSec(mob)}>{mob ? "Excel" : "📥 Excel"}</button>
+                <button onClick={printSummary} style={btnSec(mob)}>{mob ? "PDF" : "🖨️ PDF"}</button>
                 <button onClick={() => { if (nextTicketNum(reports) > 1000) { alert("⚠️ Se alcanzó el límite de 1000 tickets."); return; } setSNR(true); }} style={btnPri(mob)}>{mob ? "+" : "+ Reporte"}</button>
               </>
             )}
@@ -4768,8 +4768,8 @@ function FTxt({ label, editing, value, onChange, placeholder }) {
 const selStyle = { background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, padding: "8px 12px", fontSize: 13, cursor: "pointer", color: "#1e293b", fontFamily: "'Inter',sans-serif", outline: "none" };
 const inpStyle = { width: "100%", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8, padding: "9px 12px", fontSize: 13, color: "#1e293b", outline: "none", boxSizing: "border-box", fontFamily: "'Inter',sans-serif" };
 const lblStyle = { display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 5 };
-const btnPri = (mob) => ({ background: "#f97316", color: "#fff", border: "none", borderRadius: 8, padding: mob ? "9px 14px" : "10px 20px", fontWeight: 600, cursor: "pointer", fontSize: mob ? 12 : 13, fontFamily: "'Inter',sans-serif", letterSpacing: 0.2 });
-const btnSec = (mob) => ({ background: "#fff", color: "#475569", border: "1px solid #e2e8f0", borderRadius: 8, padding: mob ? "9px 14px" : "10px 20px", cursor: "pointer", fontSize: mob ? 12 : 13, fontFamily: "'Inter',sans-serif", fontWeight: 500 });
+const btnPri = (mob) => ({ background: "#f97316", color: "#fff", border: "none", borderRadius: 8, padding: mob ? "9px 0" : "10px 20px", fontWeight: 600, cursor: "pointer", fontSize: mob ? 13 : 13, fontFamily: "'Inter',sans-serif", letterSpacing: 0.2, width: mob ? 44 : "auto", height: mob ? 38 : "auto", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 });
+const btnSec = (mob) => ({ background: "#fff", color: "#475569", border: "1px solid #e2e8f0", borderRadius: 8, padding: mob ? "9px 0" : "10px 20px", cursor: "pointer", fontSize: mob ? 12 : 13, fontFamily: "'Inter',sans-serif", fontWeight: 500, width: mob ? 44 : "auto", height: mob ? 38 : "auto", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 });
 
 /* ─── AREAS VIEW ─── */
 function AreasView({ areas, setAreas, reports, mob }) {
