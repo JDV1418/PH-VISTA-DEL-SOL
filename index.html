@@ -555,16 +555,8 @@ function App() {
 
   const setReports = async (updater) => {
     const prev = reports, next = typeof updater === 'function' ? updater(prev) : updater;
-    // Guard: nunca borrar más de la mitad de los reportes en una sola operación
-    const docsInPrev = prev.filter(r => r._docId).length;
-    const docsToDelete = prev.filter(r => r._docId && !next.find(x => x._docId === r._docId)).length;
-    if (docsInPrev > 2 && docsToDelete > docsInPrev / 2) {
-      console.error('[VORTEX] setReports abortado — intento de borrar', docsToDelete, 'de', docsInPrev, 'reportes. Operación bloqueada por seguridad.');
-      return;
-    }
+    // Solo agrega nuevos — jamás borra reportes de Firestore automáticamente
     for (const r of next) { if (!r._docId) await fbAddWithImages('reports', r); }
-    for (const r of prev) { if (r._docId && !next.find(x => x._docId === r._docId)) await fbDelete('reports', r._docId); }
-    for (const r of next) { if (r._docId) { const o = prev.find(x => x._docId === r._docId); if (o && JSON.stringify({...o,_docId:''}) !== JSON.stringify({...r,_docId:''})) await fbUpdate('reports', r._docId, r); } }
   };
   const setVendors = async (updater) => {
     const prev = vendors, next = typeof updater === 'function' ? updater(prev) : updater;
