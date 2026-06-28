@@ -1763,7 +1763,7 @@ function AdminApp({ user, reports, setReports, vendors, setVendors, residents, s
           {view === "dashboard" && <UnifiedDashboard user={user} role="admin" reports={reports} vendors={vendors} residents={residents} comprobantes={comprobantes} setView={(v) => { setViewPersisted(v); setSR(null); }} setFS={setFS} mob={mob} printSummary={printSummary} onLogout={onLogout} fullPage={false} />}
           {view === "reports" && (
             selectedReport
-              ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => r.id === upd.id ? upd : r)); setSR(upd); }} onArchive={id => { onArchiveReport(id); setSR(null); }} vendors={vendors} mob={mob} setConfirmModal={setConfirmModal} />
+              ? <ReportDetail report={selectedReport} onBack={() => setSR(null)} onUpdate={upd => { setReports(p => p.map(r => (upd._docId ? r._docId === upd._docId : r.id === upd.id) ? upd : r)); setSR(upd); }} onArchive={id => { onArchiveReport(id); setSR(null); }} vendors={vendors} mob={mob} setConfirmModal={setConfirmModal} />
               : <ReportsAreaDash reports={reports} onSelect={setSR} onRestore={id => { onRestoreReport(id); }} mob={mob} handleRenumerar={handleRenumerar} />
           )}
           {view === "inspecciones" && <InspeccionesView inspections={inspections} setInspections={setInspections} user={user} mob={mob} />}
