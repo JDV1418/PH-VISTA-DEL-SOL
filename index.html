@@ -440,6 +440,17 @@ const pri = (id) => PRIORITIES.find(p => p.id === id) || PRIORITIES[1];
 
 /* Formatea cualquier número como VDS-0001 */
 const fmtTicket = (n) => n ? `VDS-${String(n).padStart(4, '0')}` : '—';
+
+/* API key para los endpoints del bot (protección contra scanners/bots externos).
+   No se guarda en el código: se pide una sola vez y queda en el dispositivo. */
+const getVdsKey = () => {
+  let k = localStorage.getItem('vds_api_key');
+  if (!k) {
+    k = window.prompt('Clave de seguridad para envíos de WhatsApp (pedirla al soporte técnico):');
+    if (k) localStorage.setItem('vds_api_key', k.trim());
+  }
+  return (k || '').trim();
+};
 const fmtDateTime = r => {
   const ts = r.createdAt || r.date || "";
   if (!ts) return "—";
@@ -3526,7 +3537,7 @@ function VotacionesView({ votes, setVotes, residents, user, mob }) {
     try {
       const res = await fetch('https://vds-whatsapp-bot-production.up.railway.app/send-vote', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-VDS-Key': getVdsKey() },
         body: JSON.stringify({
           voteId: voto._docId,
           titulo: voto.titulo,
@@ -4147,7 +4158,7 @@ function ComunicadosView({ residents, mob }) {
     try {
       const res = await fetch("https://vds-whatsapp-bot-production.up.railway.app/send-comunicado", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-VDS-Key": getVdsKey() },
         body: JSON.stringify({ titulo: com.titulo, desc: com.desc, icon: com.icon, categoria: com.categoria })
       });
       const data = await res.json();
@@ -4254,7 +4265,7 @@ function ComprobantesAdmin({ comprobantes, setComprobantes, residents, mob }) {
       try {
         await fetch("https://vds-whatsapp-bot-production.up.railway.app/notify-comprobante", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "X-VDS-Key": getVdsKey() },
           body: JSON.stringify({
             apt:          comp.apt,
             residentName: comp.residentName || "",
